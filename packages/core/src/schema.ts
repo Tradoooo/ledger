@@ -145,7 +145,7 @@ export const ViewName = z.enum(["trial-balance", "income-statement", "envelopes"
 
 export const View = z.strictObject({
   v: z.literal(1),
-  app: z.enum(["envelopes", "mutual-aid", "skeleton"]), // purity-ok: the shared contract names the apps it serves
+  app: z.string().min(1).max(40), // the core does not know the applications it serves
   report: ViewName,
   params: z.strictObject({
     from: IsoDate.optional(), to: IsoDate.optional(), period: Period.optional(),

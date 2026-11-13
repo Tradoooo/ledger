@@ -170,6 +170,7 @@ export function App() {
   ];
   return (
     <Shell
+      theme={"warm-paper"}
       title={ledger.name}
       subtitle={`${t(locale, "report.period")} ${PERIOD}`}
       locale={locale}

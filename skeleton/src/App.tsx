@@ -30,7 +30,7 @@ export function App() {
   const [tab, setTab] = useState("reports");
   const balance = useMemo(() => trialBalance(journal, chart, { asOf: today, unit: "EUR" }), [journal]);
   return (
-    <Shell title="Ledger skeleton" subtitle={`${journal.records.length} entries · chain ${verifyChain(journal).ok ? "ok" : "broken"}`}
+    <Shell theme={"plain"} title="Ledger skeleton" subtitle={`${journal.records.length} entries · chain ${verifyChain(journal).ok ? "ok" : "broken"}`}
       locale="en" tabs={[{ id: "reports", label: t("en", "tab.reports") }, { id: "audit", label: t("en", "tab.audit") }]}
       activeTab={tab} onTab={setTab}
       actions={<><button className="bb-btn" type="button" onClick={() => setJournal((j) => append(j, sample(1)))}>Add entry</button>

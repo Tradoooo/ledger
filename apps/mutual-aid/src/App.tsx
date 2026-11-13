@@ -259,6 +259,7 @@ export function App(): ReactNode {
   const [tab, setTab] = useState("fund");
   return (
     <Shell
+      theme={"ink-paper"}
       title={mutualAid.name}
       subtitle="Public by default: every entry is hashed, every euro is traceable."
       locale={LOCALE}

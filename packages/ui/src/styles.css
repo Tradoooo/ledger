@@ -9,6 +9,12 @@
   :root { --ink: #eee9dc; --ink-soft: #b5ae9c; --paper: #16150f; --paper-alt: #1f1d16; --rule: #3a3629;
           --accent: #e0a06a; --ok: #7fc79a; --warn: #e0b567; --bad: #e08a7f; }
 }
+/* The three themes of the `definePresentation` extension point. */
+[data-theme="warm-paper"] { --ink: #241d12; --ink-soft: #5d5241; --paper: #f7efe1; --paper-alt: #fffdf7; --rule: #e0d5c0; --accent: #8f4f16; }
+[data-theme="ink-paper"] { --ink: #f2efe6; --ink-soft: #a9a294; --paper: #17161a; --paper-alt: #1f1e24; --rule: #33313b; --accent: #d8b26a; }
+@media (prefers-color-scheme: dark) {
+  [data-theme="warm-paper"] { --ink: #f3ead9; --ink-soft: #b3a48c; --paper: #1a1610; --paper-alt: #241f16; --rule: #3b3326; --accent: #e0a06a; }
+}
 * { box-sizing: border-box; }
 body { margin: 0; background: var(--paper); color: var(--ink); }
 .bb-shell { min-height: 100dvh; display: flex; flex-direction: column; }

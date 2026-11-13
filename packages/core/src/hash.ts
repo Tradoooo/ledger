@@ -24,35 +24,58 @@ const K = new Uint32Array([
 
 const rotr = (x: number, n: number): number => (x >>> n) | (x << (32 - n));
 
-/** Hex-encoded SHA-256 of a UTF-8 string. */
+/** Hex-encoded SHA-256 of a UTF-8 string.
+ *
+ * Allocation-free on the hot path: the schedule, the byte buffer and the hex table are
+ * module-level scratch. Verifying a 12 000-entry chain means 12 000 hashes, so this function
+ * is the one the "chain verifies in < 150 ms" budget is really about.
+ */
+const W = new Uint32Array(64);
+const BYTES = new Uint8Array(8192);
+const ENCODER = new TextEncoder();
+const HEX: string[] = [];
+for (let value = 0; value < 256; value += 1) HEX.push(value.toString(16).padStart(2, "0"));
+
+/** One 32-bit word as eight hex characters. */
+const word = (value: number): string =>
+  HEX[value >>> 24]! + HEX[(value >>> 16) & 0xff]! + HEX[(value >>> 8) & 0xff]! + HEX[value & 0xff]!;
+
 export function sha256Hex(message: string): string {
-  const bytes = new TextEncoder().encode(message);
-  const total = (((bytes.length + 9 + 63) >> 6) << 6);
-  const block = new Uint8Array(total);
-  block.set(bytes);
-  block[bytes.length] = 0x80;
-  const view = new DataView(block.buffer);
-  const bits = bytes.length * 8;
-  view.setUint32(total - 8, Math.floor(bits / 0x100000000), false);
-  view.setUint32(total - 4, bits >>> 0, false);
+  const written = ENCODER.encodeInto(message, BYTES);
+  const length = written.written;
+  const total = (((length + 9 + 63) >> 6) << 6);
+  const block = total <= BYTES.length ? BYTES : new Uint8Array(total);
+  if (total <= BYTES.length) block.set(BYTES.subarray(0, length));
+  else block.set(BYTES.subarray(0, length));
+  block[length] = 0x80;
+  block.fill(0, length + 1, total - 8); // the buffer is reused: the padding must be cleared
+  const bits = length * 8;
+  const high = Math.floor(bits / 0x100000000);
+  const low = bits >>> 0;
+  block[total - 8] = (high >>> 24) & 0xff; block[total - 7] = (high >>> 16) & 0xff;
+  block[total - 6] = (high >>> 8) & 0xff; block[total - 5] = high & 0xff;
+  block[total - 4] = (low >>> 24) & 0xff; block[total - 3] = (low >>> 16) & 0xff;
+  block[total - 2] = (low >>> 8) & 0xff; block[total - 1] = low & 0xff;
 
   let h0 = 0x6a09e667, h1 = 0xbb67ae85, h2 = 0x3c6ef372, h3 = 0xa54ff53a;
   let h4 = 0x510e527f, h5 = 0x9b05688c, h6 = 0x1f83d9ab, h7 = 0x5be0cd19;
-  const w = new Uint32Array(64);
 
-  for (let off = 0; off < total; off += 64) {
-    for (let i = 0; i < 16; i++) w[i] = view.getUint32(off + i * 4, false);
+  for (let offset = 0; offset < total; offset += 64) {
+    for (let i = 0; i < 16; i++) {
+      const p = offset + i * 4;
+      W[i] = ((block[p]! << 24) | (block[p + 1]! << 16) | (block[p + 2]! << 8) | block[p + 3]!) >>> 0;
+    }
     for (let i = 16; i < 64; i++) {
-      const a15 = w[i - 15]!, a2 = w[i - 2]!;
+      const a15 = W[i - 15]!, a2 = W[i - 2]!;
       const s0 = rotr(a15, 7) ^ rotr(a15, 18) ^ (a15 >>> 3);
       const s1 = rotr(a2, 17) ^ rotr(a2, 19) ^ (a2 >>> 10);
-      w[i] = (w[i - 16]! + s0 + w[i - 7]! + s1) >>> 0;
+      W[i] = (W[i - 16]! + s0 + W[i - 7]! + s1) >>> 0;
     }
     let a = h0, b = h1, c = h2, d = h3, e = h4, f = h5, g = h6, h = h7;
     for (let i = 0; i < 64; i++) {
       const S1 = rotr(e, 6) ^ rotr(e, 11) ^ rotr(e, 25);
       const ch = (e & f) ^ (~e & g);
-      const t1 = (h + S1 + ch + K[i]! + w[i]!) >>> 0;
+      const t1 = (h + S1 + ch + K[i]! + W[i]!) >>> 0;
       const S0 = rotr(a, 2) ^ rotr(a, 13) ^ rotr(a, 22);
       const maj = (a & b) ^ (a & c) ^ (b & c);
       const t2 = (S0 + maj) >>> 0;
@@ -62,10 +85,7 @@ export function sha256Hex(message: string): string {
     h0 = (h0 + a) >>> 0; h1 = (h1 + b) >>> 0; h2 = (h2 + c) >>> 0; h3 = (h3 + d) >>> 0;
     h4 = (h4 + e) >>> 0; h5 = (h5 + f) >>> 0; h6 = (h6 + g) >>> 0; h7 = (h7 + h) >>> 0;
   }
-  const out = new Uint8Array(32);
-  const ov = new DataView(out.buffer);
-  [h0, h1, h2, h3, h4, h5, h6, h7].forEach((v, i) => ov.setUint32(i * 4, v, false));
-  return Array.from(out, (b) => b.toString(16).padStart(2, "0")).join("");
+  return word(h0) + word(h1) + word(h2) + word(h3) + word(h4) + word(h5) + word(h6) + word(h7);
 }
 
 /** JSON with sorted keys and no whitespace: the only form that may be hashed. */

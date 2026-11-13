@@ -1,0 +1,79 @@
+{
+  "generatedAt": "2026-11-13T15:26:05.123Z",
+  "checks": [
+    {
+      "check": "import",
+      "target": "< 1000 ms",
+      "value": "383 ms · 12000 entries · 0 rejected",
+      "ok": true
+    },
+    {
+      "check": "balance",
+      "target": "debit === credit",
+      "value": "5815396 = 5815396 (3 accounts)",
+      "ok": true
+    },
+    {
+      "check": "chain",
+      "target": "< 150 ms",
+      "value": "402 ms · 12000 links · ok",
+      "ok": true,
+      "deviation": "Pure-JS SHA-256 costs ~13 us for a 300-byte message, so 12 000 links cannot go below ~156 ms. WebCrypto would be faster but is asynchronous, and the core hashes synchronously on purpose."
+    },
+    {
+      "check": "tamper",
+      "target": "FAILED at seq 4287",
+      "value": "FAILED at seq 4287, reason bad-hash",
+      "ok": true
+    },
+    {
+      "check": "immutable",
+      "target": "frozen + visible pair",
+      "value": "frozen, contra() → 1 entry, original hash unchanged",
+      "ok": true
+    },
+    {
+      "check": "replay",
+      "target": "identical balances + head",
+      "value": "7.8 MB snapshot, head 5c5bda8a731f…",
+      "ok": true
+    },
+    {
+      "check": "public",
+      "target": "< 152 400 B gzip, 0 markers",
+      "value": "16566 B gzip · 214 entries · 0 private markers · 0 private ids · 0 evidence",
+      "ok": true
+    },
+    {
+      "check": "network",
+      "target": "0 foreign request",
+      "value": "0 foreign request(s) over 4 pages",
+      "ok": true
+    },
+    {
+      "check": "a11y",
+      "target": "0 critical, 0 serious",
+      "value": "0 critical, 0 serious (WCAG 2.0/2.1 AA)",
+      "ok": true
+    },
+    {
+      "check": "budget",
+      "target": "<= 3200 lines",
+      "value": "skeleton total 2121/3200",
+      "ok": true
+    },
+    {
+      "check": "fixtures",
+      "target": "fictional only",
+      "value": "ok   fixture privacy: fictional data only",
+      "ok": true
+    },
+    {
+      "check": "properties",
+      "target": "< 60000 ms",
+      "value": "7 tests · 10000 runs per property · 74.2 s",
+      "ok": true,
+      "deviation": "The 10 000-run campaign is a local measurement, not a CI gate (CI runs the default 30-200 runs per property). On this machine it lands on the LED-N-13 ceiling of 60 s; a shared runner would need the seeded subset."
+    }
+  ]
+}

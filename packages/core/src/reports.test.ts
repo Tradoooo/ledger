@@ -9,6 +9,9 @@ import type { Entry, Journal, Posting } from "./schema.js";
 import { auditTrail, incomeStatement, trialBalance } from "./reports.js";
 import { entry, posting, transfer, ulid } from "../tests/helpers.js";
 
+/** Property runs: 30 by default, 10 000 for the submission campaign (LED-N-13). */
+const RUNS = (n: number): number => Number(process.env.LEDGER_RUNS ?? n);
+
 const UNIT = { kind: "currency", code: "EUR" } as const;
 const ACCOUNTS = ["assets:bank", "expenses:food", "expenses:rent", "income:donations"] as const;
 
@@ -186,7 +189,7 @@ describe("property", () => {
         expect(shapeOk(statement)).toBe(true);
         expect(statement.rows.every((r) => r.accountId.startsWith("income:") || r.accountId.startsWith("expenses:"))).toBe(true);
       }),
-      { numRuns: 50, seed: 20261113 },
+      { numRuns: RUNS(50), seed: 20261113 },
     );
   });
 });

@@ -4,6 +4,9 @@ import { append, createJournal, headHash, LedgerError, validateEntry, verifyChai
 import { entry, posting, transfer, ulid } from "../tests/helpers.js";
 import { GENESIS } from "./hash.js";
 
+/** Property runs: 30 by default, 10 000 for the submission campaign (LED-N-13). */
+const RUNS = (n: number): number => Number(process.env.LEDGER_RUNS ?? n);
+
 const codeOf = (fn: () => unknown): string => {
   try { fn(); return "no-error"; } catch (error) { return error instanceof LedgerError ? error.code : "not-a-ledger-error"; }
 };
@@ -68,7 +71,7 @@ describe("append and verifyChain", () => {
         const broken = { ...journal, records: journal.records.map((r, i) => (i === 1 ? { ...r, note: "tampered" } : r)) };
         expect(verifyChain(broken)).toEqual({ ok: false, index: 1, reason: "bad-hash" });
       }),
-      { numRuns: 30, seed: 20261113 },
+      { numRuns: RUNS(30), seed: 20261113 },
     );
   });
 });

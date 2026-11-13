@@ -9,6 +9,7 @@ const BUDGETS = [
   { name: "skeleton", dir: "skeleton/src", max: 200 },
   { name: "app:envelopes", dir: "apps/envelopes/src", max: 600 },
   { name: "app:mutual-aid", dir: "apps/mutual-aid/src", max: 600 },
+  { name: "app:time-bank", dir: "apps/time-bank/src", max: 600 },
 ];
 const SKELETON_TOTAL = 3200;
 

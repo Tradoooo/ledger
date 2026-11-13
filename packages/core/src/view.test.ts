@@ -6,6 +6,9 @@ import type { Journal, RedactionPolicy } from "./schema.js";
 import { decodeView, encodeView, pseudonym, redactEntry, redactJournal, ViewError } from "./view.js";
 import { entry, posting, transfer, ulid } from "../tests/helpers.js";
 
+/** Property runs: 30 by default, 10 000 for the submission campaign (LED-N-13). */
+const RUNS = (n: number): number => Number(process.env.LEDGER_RUNS ?? n);
+
 const SEED = 20261113;
 const STRICT: RedactionPolicy = { parties: "pseudonymised", dates: "month", amounts: "exact", memo: "whitelist", minGroupSize: 3 };
 const AGGREGATE: RedactionPolicy = { ...STRICT, parties: "aggregate" };
@@ -143,7 +146,7 @@ describe("redactJournal", () => {
           expect(text).not.toContain("evidence");
         }
       }),
-      { numRuns: 15, seed: SEED },
+      { numRuns: RUNS(15), seed: SEED },
     );
   });
 });
@@ -188,7 +191,7 @@ describe("encodeView / decodeView", () => {
         expect(fragment.length).toBeLessThanOrEqual(2000);
         expect(await decodeView(fragment)).toEqual(view);
       }),
-      { numRuns: 25, seed: SEED },
+      { numRuns: RUNS(25), seed: SEED },
     );
   });
 
@@ -198,7 +201,7 @@ describe("encodeView / decodeView", () => {
         const outcome = await decodeView(text).then(() => "accepted", (error: unknown) => (error instanceof ViewError ? "view-error" : "wrong-error"));
         expect(outcome).not.toBe("wrong-error");
       }),
-      { numRuns: 40, seed: SEED },
+      { numRuns: RUNS(40), seed: SEED },
     );
   });
 });

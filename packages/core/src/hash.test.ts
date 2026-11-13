@@ -4,6 +4,9 @@ import fc from "fast-check";
 import { canonicalJson, entryCanonical, entryHash, GENESIS, sha256Hex } from "./hash.js";
 import { entry } from "../tests/helpers.js";
 
+/** Property runs: 30 by default, 10 000 for the submission campaign (LED-N-13). */
+const RUNS = (n: number): number => Number(process.env.LEDGER_RUNS ?? n);
+
 describe("sha256Hex", () => {
   it("matches node:crypto on fixed vectors", () => {
     for (const input of ["", "abc", "ledger:v1\n", "éàü", "a".repeat(1000)]) {
@@ -16,7 +19,7 @@ describe("sha256Hex", () => {
       fc.property(fc.string({ maxLength: 400 }), (input) => {
         expect(sha256Hex(input)).toBe(createHash("sha256").update(input, "utf8").digest("hex"));
       }),
-      { numRuns: 200, seed: 20261113 },
+      { numRuns: RUNS(200), seed: 20261113 },
     );
   });
 });
@@ -32,7 +35,7 @@ describe("canonicalJson", () => {
         const shuffled = Object.fromEntries(Object.entries(dict).reverse());
         expect(canonicalJson(dict)).toBe(canonicalJson(shuffled));
       }),
-      { numRuns: 100, seed: 20261113 },
+      { numRuns: RUNS(100), seed: 20261113 },
     );
   });
 });

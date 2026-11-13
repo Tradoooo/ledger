@@ -7,7 +7,10 @@ import { LedgerError, validateEntry } from "./journal.js";
 import { entryHash, GENESIS, sha256Hex } from "./hash.js";
 import { ulid } from "../tests/helpers.js";
 
-const SEED = { seed: 20261113, numRuns: 30 } as const;
+/** Property runs: 30 by default, 10 000 for the submission campaign (LED-N-13). */
+const RUNS = (n: number): number => Number(process.env.LEDGER_RUNS ?? n);
+
+const SEED = { seed: 20261113, numRuns: RUNS(30) } as const;
 
 /** Strings are UTF-8 encoded, numbers are raw octets: enough to hand-write windows-1252. */
 const bytes = (...parts: (string | number)[]): Uint8Array => {
