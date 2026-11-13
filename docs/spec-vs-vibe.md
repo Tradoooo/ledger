@@ -22,28 +22,39 @@ plain-language note, must not mutate anything.
 | Measure | Spec-driven | Vibe |
 |---|---|---|
 | Module | **194 lines** | **215 lines** |
-| Tests written | **322 lines, 21 tests** | 320 lines, **16 tests** |
+| Tests written | **322 lines, 21 tests** (10 fast-check properties, 500 generated cases) | 320 lines, **16 tests** (~2 300 generated cases) |
 | Behaviour delivered | both pass | both pass |
 | **Import discipline** | **type-only**, from the package entry | **five deep value imports** (`core/src/hash`, `core/src/ids`, `core/src/journal`) — exactly what the repository's `lint` guard refuses |
-| Elapsed | ~29 min | ~25 min |
+| Elapsed | **27 min 59 s** | **27 min 00 s** |
+| Tool calls | 27 | 19 |
+| Cases left to arbitrate | 7 (list below) | 7 (list below) |
 
 Both were running concurrently on the same machine, and both were slowed by that contention; the
 elapsed figures are order-of-magnitude, not a benchmark.
 
 ## What the numbers actually say
 
-1. **The spec did not make the code shorter — it made it narrower.** Arm A wrote fewer lines and
-   *more* tests, because `design.md` had already decided the shape (what a reversal is, what the
-   canonical form touches) and left only the cases to enumerate. Arm B had to invent that shape, and
-   invented a richer one than asked (content-derived identifiers, a `date` option) — 21 lines more.
-2. **The measurable difference is discipline, not speed.** Arm A never reached into the core's
-   internals; Arm B imported five internals directly. In this repository that is not a style
-   preference: `.github/checks` and `scripts/lint.mjs` fail the build on a deep import. In other
-   words, **the vibe output would not have been mergeable**, and the reason is invisible in the task
-   description — it lives in the steering.
-3. **Both passed their own tests.** Neither arm produced a defect the other avoided. On a task this
-   small, the honest conclusion is that the spec's value showed up in the *review*, not in the
-   *result*: one output fits the house rules, the other does not.
+1. **The spec did not make it faster.** 27 min 59 s against 27 min 00 s — the same, within noise.
+   Anyone claiming that a spec buys speed on a one-function task is selling something.
+2. **It did not remove the judgement calls.** Both arms listed **seven** arbitrations ("what the
+   text did not say"). The spec removed the ambiguity about *the shape* — what a reversal is, what
+   the canonical form touches, which error codes exist — but it did not remove the ambiguity about
+   *edge cases*: whether an empty `newPostings` means "mirror" or "zero entries", whether `-0` must
+   be normalised, whether a reversal may itself be reversed. Those were decided, in both arms, by
+   the person writing the code.
+3. **The measurable difference is discipline.** Arm A never reached into the core's internals;
+   Arm B imported five of them directly. In this repository that is not a style preference:
+   `scripts/lint.mjs` fails the build on a deep import. **The vibe output would not have been
+   mergeable**, and the reason is invisible in the task description — it lives in the steering, and
+   only the spec arm read it.
+4. **The spec arm wrote more tests for the same behaviour** (21 against 16) and fewer lines of code
+   (194 against 215): less invention, more enumeration. Arm B also *added* behaviour nobody asked
+   for — content-derived identifiers, a `date` option — which is where the extra 21 lines went.
+
+So the honest summary of one measured run: **the spec changed the shape of the work, not its
+duration.** It produced code that fits the house rules, and tests that cover more of the contract —
+which is exactly what a reviewer needs, and exactly what a marketing slide about "spec-driven
+development" usually leaves out.
 
 ## Limits of this experiment
 
