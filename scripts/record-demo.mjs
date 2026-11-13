@@ -9,7 +9,8 @@
  * `node scripts/record-demo.mjs` → `artifacts/demo-<page>-<width>x<height>.webm`.
  * The film itself stays human: this writes the shots, nobody writes the voice-over.
  */
-import { mkdirSync, readdirSync, renameSync, rmSync } from "node:fs";
+import { mkdirSync, mkdtempSync, readdirSync, renameSync, rmSync } from "node:fs";
+import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { chromium } from "playwright";
 import { startServer } from "../e2e/server.mjs";
@@ -99,8 +100,8 @@ mkdirSync(OUT, { recursive: true });
 try {
   for (const framing of FRAMINGS) {
     for (const shot of SHOTS) {
-      const workDir = join(OUT, `.work-${shot.page}-${framing.name}`);
-      mkdirSync(workDir, { recursive: true });
+      // The camera writes its file first, in a scratch directory outside the repository.
+      const workDir = mkdtempSync(join(tmpdir(), `ledger-demo-${shot.page}-`));
       try {
         await record(browser, site.base, shot, framing, workDir);
       } finally {
