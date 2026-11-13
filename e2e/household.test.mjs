@@ -33,6 +33,26 @@ async function pendingCount(page) {
   return match === null ? 0 : Number(match[1]);
 }
 
+/** The correction, done by hand: another account chosen, then "Corriger et retenir". */
+async function correctFirstProposal(page) {
+  const item = page.locator("main ul li").first();
+  const text = (await item.innerText()).replace(/\s+/g, " ");
+  const select = item.locator("select");
+  const proposed = await select.locator("option:checked").innerText();
+  const options = await select.locator("option").evaluateAll((nodes) => nodes.map((node) => ({ label: node.textContent.trim(), value: node.value })));
+  const target = options.find((option) => option.label !== proposed && option.label !== "À classer");
+  assert.ok(target !== undefined, "another account can be chosen");
+  await select.selectOption({ label: target.label });
+  await item.getByRole("button", { name: /Corriger/ }).click();
+  return { text, target };
+}
+
+/** The book the browser keeps: the entries, the learned rules, the assignments. */
+async function storedBook(page) {
+  const raw = await page.evaluate((key) => localStorage.getItem(key), BOOK_KEY);
+  return raw === null ? null : JSON.parse(raw);
+}
+
 test("foyer : corriger une affectation, voir la règle apprise, lire leftToday", { timeout: 60_000 }, async (t) => {
   const opened = await openPage(app.browser, app.base, "/envelopes/");
   const { page, errors, foreign } = opened;
@@ -48,15 +68,8 @@ test("foyer : corriger une affectation, voir la règle apprise, lire leftToday",
   assert.ok(pending > 0, `the demo book has proposals waiting, got ${pending}`);
 
   const items = page.locator("main ul li");
-  const item = items.first();
-  const text = (await item.innerText()).replace(/\s+/g, " ");
-  const select = item.locator("select");
-  const proposed = await select.locator("option:checked").innerText();
-  const options = await select.locator("option").evaluateAll((nodes) => nodes.map((node) => ({ label: node.textContent.trim(), value: node.value })));
-  const target = options.find((option) => option.label !== proposed && option.label !== "À classer");
-  assert.ok(target !== undefined, "another account can be chosen");
-  await select.selectOption({ label: target.label });
-  await item.getByRole("button", { name: /Corriger/ }).click();
+  assert.ok(await items.count() > 0, "the demo book shows the proposals to classify");
+  const { text, target } = await correctFirstProposal(page);
 
   const notice = page.getByRole("status").first();
   await notice.waitFor({ state: "visible" });
@@ -69,10 +82,7 @@ test("foyer : corriger une affectation, voir la règle apprise, lire leftToday",
   assert.equal(await pendingCount(page), pending - 1, "one proposal less: the decision is recorded");
 
   /* 3 — the rule is kept: the book carries it, so the next statement is classified with it. */
-  const stored = await page.evaluate((key) => {
-    const raw = localStorage.getItem(key);
-    return raw === null ? null : JSON.parse(raw);
-  }, BOOK_KEY);
+  const stored = await storedBook(page);
   assert.ok(stored !== null, "the book is kept in the browser");
   assert.equal(stored.rules.length, 1, `exactly one learned rule is stored, got ${stored.rules.length}`);
   assert.equal(stored.rules[0].origin, "learned", "the stored rule is a learned one");

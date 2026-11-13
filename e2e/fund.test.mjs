@@ -14,13 +14,10 @@ after(async () => { await app.close(); });
 /** The demo book the fund ships: 214 chained entries, built in the browser, no request. */
 const DEMO_ENTRIES = 214;
 
-test("fonds : saisir une écriture, vérifier un reçu, publier", { timeout: 120_000 }, async (t) => {
-  const opened = await openPage(app.browser, app.base, "/mutual-aid/");
-  const { page, errors, foreign } = opened;
-
+/** The entry, typed by hand: an aid paid out of the fund, hashed and chained on save. */
+async function recordAnAid(page) {
   const form = page.locator("form.bb-card").first();
   await form.waitFor({ state: "visible" });
-  /* 1 — the entry, typed by hand: an aid paid out of the fund. */
   await page.getByRole("button", { name: "Aid", exact: true }).click();
   await form.getByLabel("Date").fill("2026-11-13");
   await form.getByLabel("Note").fill("Aide alimentaire — e2e");
@@ -30,10 +27,26 @@ test("fonds : saisir une écriture, vérifier un reçu, publier", { timeout: 120
   await selects.nth(1).selectOption({ index: 1 });
   assert.match((await form.locator("table.bb-table").innerText()).replace(/\s+/g, " "), /Σ €0\.00/, "the sum is zero before the click");
   await form.getByRole("button", { name: "Save entry" }).click();
-
   const notice = page.getByRole("status").first();
   await notice.waitFor({ state: "visible" });
-  assert.match(await notice.innerText(), new RegExp(`Entry #${DEMO_ENTRIES} added`), "the entry is appended, and the chain recomputed");
+  return (await notice.innerText()).replace(/\s+/g, " ");
+}
+
+/** The donor's receipt: two strings, one verifiable answer, offline. */
+async function checkReceipt(page, publish) {
+  await publish.getByRole("button", { name: "Verify" }).click();
+  const verdict = page.getByRole("status").first();
+  await verdict.waitFor({ state: "visible" });
+  return (await verdict.innerText()).replace(/\s+/g, " ");
+}
+
+test("fonds : saisir une écriture, vérifier un reçu, publier", { timeout: 120_000 }, async (t) => {
+  const opened = await openPage(app.browser, app.base, "/mutual-aid/");
+  const { page, errors, foreign } = opened;
+
+  /* 1 — the entry, typed by hand. */
+  const saved = await recordAnAid(page);
+  assert.match(saved, new RegExp(`Entry #${DEMO_ENTRIES} added`), "the entry is appended, and the chain recomputed");
 
   await page.getByRole("tab", { name: "Ledger" }).click();
   assert.match(await page.locator("main h2").first().innerText(), new RegExp(`— ${DEMO_ENTRIES + 1} entries`), "the ledger holds one more entry");
@@ -41,18 +54,13 @@ test("fonds : saisir une écriture, vérifier un reçu, publier", { timeout: 120
   /* 2 — the donor's receipt: two strings, one verifiable answer, offline. */
   await page.getByRole("tab", { name: "Publish" }).click();
   const publish = page.locator("main");
-  await publish.getByRole("button", { name: "Verify" }).click();
-  const verdict = page.getByRole("status").first();
-  await verdict.waitFor({ state: "visible" });
-  const verified = await verdict.innerText();
+  const verified = await checkReceipt(page, publish);
   assert.match(verified, /Verified — Entry #\d+ confirmed/, `the receipt answers by the chain: ${verified}`);
 
   /* A wrong hash must be refused with its reason, not silently accepted. */
   const hashField = page.locator("main input").nth(1);
   await hashField.fill("0".repeat(64));
-  await publish.getByRole("button", { name: "Verify" }).click();
-  await page.waitForTimeout(150);
-  const refused = await page.getByRole("status").first().innerText();
+  const refused = await checkReceipt(page, publish);
   assert.match(refused, /Not found/, `a forged receipt is not found: ${refused}`);
 
   /* 3 — publication: one standalone file, delivered as a blob, no server. */
@@ -64,6 +72,6 @@ test("fonds : saisir une écriture, vérifier un reçu, publier", { timeout: 120
 
   assert.deepEqual(errors, [], `no console error, got ${errors[0] ?? "none"}`);
   assert.deepEqual(foreign, [], `no foreign request, got ${foreign[0] ?? "none"}`);
-  t.diagnostic(`receipt: ${verified.replace(/\s+/g, " ")}`);
+  t.diagnostic(`receipt: ${verified}`);
   await closePage(opened);
 });
