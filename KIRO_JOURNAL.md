@@ -93,6 +93,14 @@ implementations published. The honest result is that **the spec did not make it 
 against 27 min 00 s) — it made the result narrower (194 lines against 215, 21 tests against 16) and
 it made the output fit the house rules (no deep import), which the one-paragraph version did not.
 
+## 5 ter. One number that moves, and how we say it
+
+Verifying the 12 000-link chain takes **78 ms** on the CI runner, about **90 ms** on an idle
+machine, **188 ms** while five agents share the box, and once **402 ms** while three measurement
+campaigns ran at the same time. The acceptance run prints the value of the day, and the documents
+quote the range instead of the best number: a measurement that depends on the load of the machine
+is a measurement, not a constant.
+
 ## 6. What did not work
 
 - Eight specs before any code: right for the contract and the journal, ceremony for `ledger-reports`

@@ -1,0 +1,29 @@
+{
+  "version": 1,
+  "about": "Every refusal a guard made, counted. Appended by the CI when a guard says no.",
+  "total": 2,
+  "guards": {
+    "loc-budget": {
+      "count": 1,
+      "lastAt": "2026-11-13T20:33:18Z",
+      "lastReason": "apps/envelopes 609/600 — the ceiling does not move: code was removed, the budget was not raised"
+    },
+    "e2e": {
+      "count": 1,
+      "lastAt": "2026-11-13T20:33:18Z",
+      "lastReason": "recette: 1 serious accessibility violation — ink-paper contrast 2.32:1 on the tab labels"
+    }
+  },
+  "refusals": [
+    {
+      "at": "2026-11-13T20:33:18Z",
+      "guard": "loc-budget",
+      "reason": "apps/envelopes 609/600 — the ceiling does not move: code was removed, the budget was not raised"
+    },
+    {
+      "at": "2026-11-13T20:33:18Z",
+      "guard": "e2e",
+      "reason": "recette: 1 serious accessibility violation — ink-paper contrast 2.32:1 on the tab labels"
+    }
+  ]
+}

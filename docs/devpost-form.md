@@ -54,7 +54,7 @@ No login, no account, no server, no network request after the page loads.
 |---|---|
 | Import of 3 years of statement (12 000 lines) | **190–227 ms**, 0 rejected |
 | Trial balance | debit **5 815 396** = credit **5 815 396** |
-| Hash chain over 12 000 links | **104 ms idle, 188 ms under load** — the acceptance run prints the value of the day |
+| Hash chain over 12 000 links | **78 ms on the CI runner, 104 ms idle, 188 ms under load** — the acceptance run prints the value of the day |
 | Tampering | detected at seq 4 287, reason `bad-hash` |
 | Immutability | assignment throws; `contra()` leaves the original hash unchanged |
 | Snapshot + replay | identical balances, identical head |

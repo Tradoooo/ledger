@@ -24,7 +24,7 @@ published page `/proof.html` is generated from that file, so it cannot drift fro
 | The ceiling never moves | line budgets, total 3 200 | `.github/checks/loc-budget.mjs` |
 | The three pages answer, for real | HTTP 200 + expected content | `scripts/check-live.mjs` |
 | Bundle stays under budget | gzip measurement at build | `scripts/run-proofs.mjs` |
-| The whole acceptance run, 12 checks | import 504 ms · balance 5 815 396 = 5 815 396 · chain 181 ms · tamper at seq 4 287 · replay identical · public 16.6 kB gzip · 0 foreign request · 0 serious a11y · 2 documented deviations | `npx vite-node scripts/recette.ts` → `docs/recette.json` |
+| The whole acceptance run, 12 checks | import 154–227 ms · balance 5 815 396 = 5 815 396 · chain 78–400 ms (it depends on the load; the run prints the value of the day) · tamper at seq 4 287 · replay identical · public 16.6 kB gzip · 0 foreign request · 0 serious a11y · 2 documented deviations | `npx vite-node scripts/recette.ts` → `docs/recette.json` |
 | The properties hold for other seeds | 20 seeds × 200 runs, all green | `node scripts/seed-sweep.mjs` |
 | A third application, from a stranger | 16 min 32 s, 542 lines, **no line changed under `packages/**`** | `docs/UNKNOWN-ROOM.md` |
 | The whole gesture, on the build | 8 Playwright tests: import → correct a rule → read the figure, record an entry → verify a receipt → publish, keyboard, mobile, reduced motion | `node --test e2e/` |
