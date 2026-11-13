@@ -171,7 +171,7 @@ export function App() {
   return (
     <Shell
       title={ledger.name}
-      subtitle={`${t(locale, "report.period")} ${PERIOD} · ${formatMinor(journal.records.length, "EUR", locale).length > 0 ? "" : ""}`}
+      subtitle={`${t(locale, "report.period")} ${PERIOD}`}
       locale={locale}
       tabs={tabs}
       activeTab={tab}

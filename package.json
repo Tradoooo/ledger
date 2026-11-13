@@ -6,7 +6,7 @@
   "license": "MIT",
   "packageManager": "pnpm@10.0.0",
   "scripts": {
-    "typecheck": "tsc -b tsconfig.build.json",
+    "typecheck": "tsc --noEmit -p tsconfig.json",
     "lint": "node scripts/lint.mjs",
     "test": "vitest run",
     "test:property": "vitest run --dir packages/core/src --testNamePattern=property",

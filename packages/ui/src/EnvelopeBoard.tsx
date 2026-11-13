@@ -43,9 +43,8 @@ export function EnvelopeBoard({ report, locale }: EnvelopeBoardProps) {
     <section className="bb-card">
       <h2>{t(locale, "tab.envelopes")}</h2>
       <p>
-        {t(locale, "report.period")} <span>{report.period}</span>
-        {", "}
-        {t(locale, "leftToday")} <span className="num">{report.daysLeft}</span>
+        <span>{t(locale, "report.period")}</span> <span>{report.period}</span>{" "}
+        <span>{t(locale, "leftToday")}</span> <span className="num">{report.daysLeft}</span>
       </p>
       <table className="bb-table">
         <thead>
