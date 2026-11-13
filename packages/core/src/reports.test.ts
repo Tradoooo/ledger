@@ -9,6 +9,9 @@ import type { Entry, Journal, Posting } from "./schema.js";
 import { auditTrail, incomeStatement, trialBalance } from "./reports.js";
 import { entry, posting, transfer, ulid } from "../tests/helpers.js";
 
+/** Property seed: fixed for reproducibility, overridable to sweep for counter-examples. */
+const SEED_VALUE = Number(process.env.LEDGER_SEED ?? 20261113);
+
 /** Property runs: 30 by default, 10 000 for the submission campaign (LED-N-13). */
 const RUNS = (n: number): number => Number(process.env.LEDGER_RUNS ?? n);
 
@@ -189,7 +192,7 @@ describe("property", () => {
         expect(shapeOk(statement)).toBe(true);
         expect(statement.rows.every((r) => r.accountId.startsWith("income:") || r.accountId.startsWith("expenses:"))).toBe(true);
       }),
-      { numRuns: RUNS(50), seed: 20261113 },
+      { numRuns: RUNS(50), seed: SEED_VALUE },
     );
   });
 });

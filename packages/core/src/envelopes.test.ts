@@ -7,6 +7,9 @@ import { availableMinor, carriedIn, defineEnvelopes, envelopeReport, leftTodayMi
 import type { Journal } from "./schema.js";
 import { transfer, ulid } from "../tests/helpers.js";
 
+/** Property seed: fixed for reproducibility, overridable to sweep for counter-examples. */
+const SEED_VALUE = Number(process.env.LEDGER_SEED ?? 20261113);
+
 /** Property runs: 30 by default, 10 000 for the submission campaign (LED-N-13). */
 const RUNS = (n: number): number => Number(process.env.LEDGER_RUNS ?? n);
 
@@ -183,7 +186,7 @@ describe("property", () => {
           expect(periods.length * budget + 0).toBe(totalSpent + closing + abandoned);
         },
       ),
-      { numRuns: RUNS(30), seed: 20261113 },
+      { numRuns: RUNS(30), seed: SEED_VALUE },
     );
   });
 
@@ -221,7 +224,7 @@ describe("property", () => {
           expect(periods.length * budget + 0).toBe(totalSpent + availables.at(-1)! + dropped);
         },
       ),
-      { numRuns: RUNS(30), seed: 20261113 },
+      { numRuns: RUNS(30), seed: SEED_VALUE },
     );
   });
 
@@ -248,7 +251,7 @@ describe("property", () => {
           }
         },
       ),
-      { numRuns: RUNS(30), seed: 20261113 },
+      { numRuns: RUNS(30), seed: SEED_VALUE },
     );
   });
 });

@@ -3,6 +3,9 @@ import fc from "fast-check";
 import { ulidFactory, ulidFrom } from "./ids.js";
 import { EntryId } from "./schema.js";
 
+/** Property seed: fixed for reproducibility, overridable to sweep for counter-examples. */
+const SEED_VALUE = Number(process.env.LEDGER_SEED ?? 20261113);
+
 /** Property runs: 30 by default, 10 000 for the submission campaign (LED-N-13). */
 const RUNS = (n: number): number => Number(process.env.LEDGER_RUNS ?? n);
 
@@ -21,7 +24,7 @@ describe("ulid", () => {
       fc.property(fc.integer({ min: 0, max: 2 ** 45 }), fc.array(fc.integer({ min: 0, max: 255 }), { minLength: 10, maxLength: 10 }), (time, random) => {
         expect(EntryId.safeParse(ulidFrom(time, random)).success).toBe(true);
       }),
-      { numRuns: RUNS(200), seed: 20261113 },
+      { numRuns: RUNS(200), seed: SEED_VALUE },
     );
   });
 });

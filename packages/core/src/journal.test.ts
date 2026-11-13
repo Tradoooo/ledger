@@ -4,6 +4,9 @@ import { append, createJournal, headHash, LedgerError, validateEntry, verifyChai
 import { entry, posting, transfer, ulid } from "../tests/helpers.js";
 import { GENESIS } from "./hash.js";
 
+/** Property seed: fixed for reproducibility, overridable to sweep for counter-examples. */
+const SEED_VALUE = Number(process.env.LEDGER_SEED ?? 20261113);
+
 /** Property runs: 30 by default, 10 000 for the submission campaign (LED-N-13). */
 const RUNS = (n: number): number => Number(process.env.LEDGER_RUNS ?? n);
 
@@ -71,7 +74,7 @@ describe("append and verifyChain", () => {
         const broken = { ...journal, records: journal.records.map((r, i) => (i === 1 ? { ...r, note: "tampered" } : r)) };
         expect(verifyChain(broken)).toEqual({ ok: false, index: 1, reason: "bad-hash" });
       }),
-      { numRuns: RUNS(30), seed: 20261113 },
+      { numRuns: RUNS(30), seed: SEED_VALUE },
     );
   });
 });
