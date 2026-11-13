@@ -18,6 +18,7 @@ const GUARDS = {
   "purity": "the skeleton holds no application concept",
   "fixture-privacy": "fictional data only, no IBAN, no valid card number",
   "url-registry": "three published URLs, one index, one proof page",
+  "recette": "the twelve checks of the acceptance run",
   "e2e": "the built site, driven like a visitor",
 };
 const HISTORY = 50;

@@ -8,7 +8,7 @@
       "lastAt": "2026-11-13T20:33:18Z",
       "lastReason": "apps/envelopes 609/600 — the ceiling does not move: code was removed, the budget was not raised"
     },
-    "e2e": {
+    "recette": {
       "count": 1,
       "lastAt": "2026-11-13T20:33:18Z",
       "lastReason": "recette: 1 serious accessibility violation — ink-paper contrast 2.32:1 on the tab labels"
@@ -22,7 +22,7 @@
     },
     {
       "at": "2026-11-13T20:33:18Z",
-      "guard": "e2e",
+      "guard": "recette",
       "reason": "recette: 1 serious accessibility violation — ink-paper contrast 2.32:1 on the tab labels"
     }
   ]
