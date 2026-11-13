@@ -56,7 +56,7 @@ jobs:
       - run: pnpm build
       - run: npx playwright install --with-deps chromium
       - name: the gestures, on the build
-        run: node --test e2e/
+        run: node --test e2e/*.test.mjs
 
   gardes:
     runs-on: ubuntu-latest
