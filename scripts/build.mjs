@@ -2,6 +2,7 @@
 /** Builds the three published sites. Three URLs, not fourteen: see .kiro/steering/lean.md */
 import { spawnSync } from "node:child_process";
 import { existsSync } from "node:fs";
+import { resolve } from "node:path";
 
 const SITES = [
   { name: "skeleton", dir: "skeleton" },
@@ -14,7 +15,7 @@ for (const site of SITES) {
     console.log(`skip ${site.name}: no entry yet (index.html + src/main.tsx required)`);
     continue;
   }
-  const result = spawnSync("npx", ["vite", "build", "--outDir", `../../dist/${site.name}`, "--emptyOutDir"], {
+  const result = spawnSync("npx", ["vite", "build", "--outDir", resolve("dist", site.name), "--emptyOutDir"], {
     cwd: site.dir, stdio: "inherit", timeout: 240_000,
   });
   if (result.status !== 0) failed = true;

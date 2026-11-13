@@ -5,6 +5,7 @@
  */
 import { append, createJournal } from "@ledger/core";
 import type { Entry, Journal } from "@ledger/core";
+import { demoEntries } from "./demo.js";
 
 const KEY = "ledger:envelopes:v1";
 
@@ -59,7 +60,7 @@ export function loadLedger(): StoredLedger {
   if (store === undefined) return emptyLedger();
   try {
     const raw = store.getItem(KEY);
-    if (raw === null) return emptyLedger();
+    if (raw === null) return { createdAt: todayIso(), entries: demoEntries() };
     const parsed = JSON.parse(raw) as { createdAt?: unknown; entries?: unknown };
     const createdAt = typeof parsed.createdAt === "string" ? parsed.createdAt : todayIso();
     return { createdAt, entries: readEntries(parsed.entries) };
