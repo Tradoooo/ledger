@@ -24,6 +24,7 @@ jobs:
           cache: pnpm
       - run: pnpm install --frozen-lockfile
       - run: pnpm build
+      - run: node scripts/assemble-site.mjs
       - run: npx playwright install --with-deps chromium
       - name: the acceptance run — the twelve checks
         env:
@@ -54,6 +55,7 @@ jobs:
           cache: pnpm
       - run: pnpm install --frozen-lockfile
       - run: pnpm build
+      - run: node scripts/assemble-site.mjs
       - run: npx playwright install --with-deps chromium
       - name: the gestures, on the build
         run: node --test e2e/*.test.mjs
