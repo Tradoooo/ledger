@@ -23,12 +23,3 @@ export function ulidFactory(clock: () => number, randomBytes: () => Uint8Array):
     return ulidFrom(clock() + last % 1000, Array.from(randomBytes()));
   };
 }
-
-/** Browser default: `crypto.getRandomValues`, no network, no clock read outside the factory. */
-export function browserUlidFactory(): () => string {
-  return ulidFactory(() => Date.now(), () => {
-    const buffer = new Uint8Array(10);
-    globalThis.crypto.getRandomValues(buffer);
-    return buffer;
-  });
-}

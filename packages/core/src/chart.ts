@@ -4,8 +4,8 @@ import type { AccountType, NormalSide, Unit } from "./schema.js";
 import { LedgerError } from "./journal.js";
 import { deepFreeze } from "./journal.js";
 
-export type AccountInput = Omit<Account, "parent" | "archived" | "daily"> &
-  Partial<Pick<Account, "parent" | "archived" | "daily">>;
+export type AccountInput = Omit<Account, "parent" | "archived" | "daily" | "normalBalance"> &
+  Partial<Pick<Account, "parent" | "archived" | "daily" | "normalBalance">>;
 
 export interface Chart {
   readonly accounts: readonly Account[];

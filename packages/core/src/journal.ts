@@ -4,7 +4,8 @@ import type { Entry, Journal, JournalRecord } from "./schema.js";
 
 export type LedgerErrorCode =
   | "TooFewPostings" | "UnbalancedEntry" | "MixedUnits" | "BadReversal" | "DuplicatePosting"
-  | "DuplicateEntry" | "BadSeq" | "BrokenLink" | "BadHash" | "NotBalanced";
+  | "DuplicateEntry" | "BadSeq" | "BrokenLink" | "BadHash" | "NotBalanced"
+  | "UnknownAccount" | "BadAmount" | "UnknownEnvelope";
 
 /** Every failure is typed. The UI can translate `code`, tests can assert on it. */
 export class LedgerError extends Error {

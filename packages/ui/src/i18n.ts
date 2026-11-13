@@ -3,10 +3,8 @@ export type Locale = "en" | "fr";
 
 const en = {
   "app.skeleton": "Skeleton",
-  "app.envelopes": "Household envelopes",
-  "app.mutualAid": "Mutual aid fund",
   "tab.overview": "Overview",
-  "tab.envelopes": "Envelopes",
+  "tab.envelopes": "Budgets",
   "tab.journal": "Journal",
   "tab.import": "Import",
   "tab.reports": "Reports",
@@ -68,10 +66,8 @@ const en = {
 
 const fr: Record<keyof typeof en, string> = {
   "app.skeleton": "Squelette",
-  "app.envelopes": "Enveloppes du foyer",
-  "app.mutualAid": "Fonds de solidarité",
   "tab.overview": "Vue d'ensemble",
-  "tab.envelopes": "Enveloppes",
+  "tab.envelopes": "Budgets",
   "tab.journal": "Journal",
   "tab.import": "Import",
   "tab.reports": "Rapports",

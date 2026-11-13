@@ -26,7 +26,7 @@ export function AuditTrace({ report, locale }: AuditTraceProps) {
       <p>
         <span>{t(locale, "audit.head")}</span> <code>{report.headHash}</code>{" "}
         <button className="bb-btn" type="button" onClick={copy}>{t(locale, "audit.head")}</button>
-        {copied ? <span className="bb-pill"> {t(locale, "share.copied")}</span> : null}
+        {copied ? <>{" "}<span className="bb-pill">{t(locale, "share.copied")}</span></> : null}
       </p>
       {report.rows.length === 0 ? (
         <p className="bb-empty">{t(locale, "audit.empty")}</p>

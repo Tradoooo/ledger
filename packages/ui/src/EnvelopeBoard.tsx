@@ -19,7 +19,7 @@ function AmountCell({ amountMinor, unit, locale }: { amountMinor: number; unit: 
   return (
     <td className="num">
       {formatMinor(amountMinor, unit, locale)}
-      {amountMinor < 0 ? <span className="bb-pill"> {OVERRUN_TAG[locale]}</span> : null}
+      {amountMinor < 0 ? <>{" "}<span className="bb-pill">{OVERRUN_TAG[locale]}</span></> : null}
     </td>
   );
 }

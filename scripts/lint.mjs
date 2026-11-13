@@ -22,7 +22,8 @@ const FORBIDDEN_CORE = [
 const FORBIDDEN_ALL = [
   [/\bfetch\s*\(/, "network access is banned: the ledger is local (LED-N-05)"],
   [/XMLHttpRequest|WebSocket|sendBeacon/, "network access is banned (LED-N-05)"],
-  [/:\s*any\b/, "no `any`: use a real type"],
+  [/:\s*any\s*(?=[,;)\]}=>]|$)/m, "no `any`: use a real type"],
+  [/\bas any\b/, "no `as any`: model the type properly"],
   [/as unknown as/, "no double cast: model the type properly"],
   [/@ledger\/core\/src\//, "deep import of the core is banned: use the package entry"],
 ];

@@ -1,0 +1,48 @@
+{
+  "startedAt": "2026-11-13T13:41:16.092Z",
+  "finishedAt": "2026-11-13T13:41:22.996Z",
+  "proofs": [
+    {
+      "id": "purity",
+      "passed": true,
+      "detail": "ok   purity: no application concept in packages/**"
+    },
+    {
+      "id": "fixture-privacy",
+      "passed": true,
+      "detail": "ok   fixture privacy: fictional data only"
+    },
+    {
+      "id": "line-budgets",
+      "passed": true,
+      "detail": "ok   skeleton total   2101/3200"
+    },
+    {
+      "id": "lint",
+      "passed": false,
+      "detail": "lint failed: packages/core/src/ids.ts: Date.now() is banned in the core: inject the clock (LED-N-04)"
+    },
+    {
+      "id": "unit-tests",
+      "passed": true,
+      "detail": "   Duration  3.40s (transform 1.85s, setup 0ms, collect 6.76s, tests 3.39s, environment 2ms, prepare 2.56s)"
+    },
+    {
+      "id": "contest",
+      "passed": true,
+      "detail": ".kiro tracked, MIT licence present"
+    },
+    {
+      "id": "line-budgets-json",
+      "passed": true,
+      "detail": "ok   skeleton total   2101/3200"
+    },
+    {
+      "id": "bundle-budget",
+      "passed": true,
+      "detail": "envelopes 108.5 kB · mutual-aid 105.3 kB"
+    }
+  ],
+  "passed": 7,
+  "total": 8
+}
