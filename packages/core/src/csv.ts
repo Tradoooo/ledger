@@ -39,7 +39,7 @@ type RowResult = { ok: true; entry: Entry } | { ok: false; rejected: RejectedRow
 const SEPARATORS: readonly Separator[] = [";", ",", "\t"];
 const SAMPLE_LINES = 20;
 const MONTH_DAYS = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
-const CANDIDATES: Readonly<Record<Decimal, readonly Thousands[]>> = { ",": [" ", "."], ".": [" ", ","] };
+const CANDIDATES: Readonly<Record<Decimal, readonly ("," | "." | " ")[]>> = { ",": [" ", "."], ".": [" ", ","] };
 
 /** BOM wins; otherwise a fatal UTF-8 decode decides, windows-1252 is the fallback. */
 function decode(bytes: Uint8Array): { text: string; encoding: Encoding } {

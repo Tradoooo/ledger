@@ -10,7 +10,10 @@ const SITES = [
 ];
 let failed = false;
 for (const site of SITES) {
-  if (!existsSync(`${site.dir}/index.html`)) { console.log(`skip ${site.name}: no index.html yet`); continue; }
+  if (!existsSync(`${site.dir}/index.html`) || !existsSync(`${site.dir}/src/main.tsx`)) {
+    console.log(`skip ${site.name}: no entry yet (index.html + src/main.tsx required)`);
+    continue;
+  }
   const result = spawnSync("npx", ["vite", "build", "--outDir", `../../dist/${site.name}`, "--emptyOutDir"], {
     cwd: site.dir, stdio: "inherit", timeout: 240_000,
   });
