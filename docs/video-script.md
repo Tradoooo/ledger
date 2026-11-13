@@ -30,7 +30,8 @@ the detection — `;`, decimal comma, Windows-1252 — then a confirm; the grid 
 number appears at the top.
 
 > "Here is the answer, and it is one number. Drop a statement in: the app reads three years of
-> twelve thousand lines in half a second — five hundred and four milliseconds — detects the
+> twelve thousand lines in under a quarter of a second — two hundred and twenty-seven milliseconds —
+> detects the
 > separator, the decimal comma and the encoding before it imports a single row. Correct one
 > assignment, it learns the rule. Leftovers roll over. And nothing was uploaded: the page made
 > zero network requests, and I can prove it."
@@ -66,7 +67,7 @@ concept that belongs to an application; then the budget guard.
 
 > "Two applications that share everything and disagree about everything: one hides all of it, one
 > publishes all of it. And a guard that says no. This concept belongs to an application, not to
-> the skeleton — it names the owner. The skeleton is two thousand one hundred and twenty-nine lines
+> the skeleton — it names the owner. The skeleton is two thousand four hundred and ninety-two lines
 > out of three thousand two hundred. The ceiling has never moved: the only accepted fix is to
 > delete code."
 
@@ -84,13 +85,15 @@ concept that belongs to an application; then the budget guard.
 *Shot:* the terminal running `scripts/recette.ts`, the numbers appearing one by one; then the
 seed sweep; then the proof page.
 
-> "Every number on this video comes from one command. Twelve thousand lines imported in five
-> hundred and four milliseconds. Trial balance: five million eight hundred and fifteen thousand
-> three hundred and ninety-six on each side. Twelve thousand links verified in a hundred and
-> eighty-one milliseconds. Tamper with one byte and the chain tells you exactly where: sequence
-> four thousand two hundred and eighty-seven, bad hash. Ninety-five tests, fifteen properties run
-> ten thousand times each, plus twenty extra seeds: all green. Zero accessibility violations,
-> zero network requests."
+> "Every number on this video comes from one command. Twelve thousand lines imported in two
+> hundred and twenty-seven milliseconds. Trial balance: five million eight hundred and fifteen
+> thousand three hundred and ninety-six on each side. Twelve thousand links verified in a hundred
+> and four milliseconds on an idle machine — a hundred and eighty-eight when five agents were
+> running, which is why the script prints the number of the day. Tamper with one byte and the chain
+> tells you exactly where: sequence four thousand two hundred and eighty-seven, bad hash. A
+> hundred and thirty-eight unit tests, fifteen properties run ten thousand times each, twenty extra
+> seeds, and sixteen views that all fit in a phone's width: all green. Zero accessibility
+> violations, zero network requests."
 
 ## 2:15 → 2:40 — what it does not prove (25 s)
 
@@ -106,7 +109,7 @@ seed sweep; then the proof page.
 
 *Shot:* the three addresses on a plain background, no decoration, no music.
 
-> "Ledger. A skeleton you can audit. Two thousand one hundred and twenty-nine lines, one law, and
+> "Ledger. A skeleton you can audit. Two thousand four hundred and ninety-two lines, one law, and
 > two applications that disagree about everything except the truth. The repository, the
 > applications, and the proofs that back every number you just saw."
 

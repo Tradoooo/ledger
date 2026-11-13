@@ -1,0 +1,89 @@
+name: recette
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+concurrency:
+  group: recette-${{ github.ref }}
+  cancel-in-progress: true
+permissions:
+  contents: read
+jobs:
+  recette:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm build
+      - run: npx playwright install --with-deps chromium
+      - name: the acceptance run — the twelve checks
+        env:
+          # The 10 000-run campaign is a local measurement; the CI runs the seeded subset so the
+          # job stays inside five minutes (see the deviation written in scripts/recette.ts).
+          RECETTE_RUNS: "200"
+        run: npx vite-node scripts/recette.ts
+      - name: the verdict — every one of the twelve checks must be green
+        run: jq -e '[.checks[] | select(.ok != true)] | length == 0' docs/recette.json
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: recette
+          path: docs/recette.json
+          retention-days: 7
+
+  e2e:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm build
+      - run: npx playwright install --with-deps chromium
+      - name: the gestures, on the build
+        run: node --test e2e/
+
+  gardes:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: the guards, and the refusals they count
+        run: |
+          failed=0
+          for guard in loc-budget purity fixture-privacy url-registry; do
+            if ! node ".github/checks/$guard.mjs"; then
+              node .github/checks/budget-refusals.mjs --refuse "$guard" "the guard said no during the CI run"
+              failed=1
+            fi
+          done
+          exit $failed
+      - name: how many times the discipline bit
+        if: always()
+        run: node .github/checks/budget-refusals.mjs | tee -a "$GITHUB_STEP_SUMMARY"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: budget-refusals
+          path: docs/budget-refusals.json
+          retention-days: 30

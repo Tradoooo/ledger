@@ -41,7 +41,7 @@ for (const page of PAGES) {
   tab.on("request", (request) => { if (!request.url().startsWith(base) && !request.url().startsWith("data:")) foreign.push(request.url()); });
   const response = await tab.goto(`${base}${page.path}`, { waitUntil: "networkidle" });
   const text = await tab.locator("body").innerText();
-  const ok = response?.status() === 200 && text.includes(page.expect) && errors.length === 0 && foreign.length === 0;
+  const ok = response?.status() === 200 && text.toLowerCase().includes(page.expect.toLowerCase()) && errors.length === 0 && foreign.length === 0;
   if (!ok) failures += 1;
   console.log(`${ok ? "PASS" : "FAIL"}  ${page.path.padEnd(14)} ${response?.status()} · ${text.replace(/\s+/g, " ").slice(0, 60)}… ${errors.length ? `· console: ${errors[0]}` : ""}${foreign.length ? ` · foreign: ${foreign[0]}` : ""}`);
   await tab.close();

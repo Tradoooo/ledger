@@ -7,57 +7,31 @@ import { defineLedger } from "@ledger/core";
 import type { AccountInput, AccountType, LedgerApp, NormalSide, Unit } from "@ledger/core";
 
 const EUR: Unit = { kind: "currency", code: "EUR" };
-
 const side = (type: AccountType): NormalSide => (type === "asset" || type === "expense" ? "debit" : "credit");
 
-const account = (id: string, type: AccountType, label: string): AccountInput => ({
-  id,
-  type,
-  unit: EUR,
-  label,
-  normalBalance: side(type),
-});
-
-const CHART: readonly AccountInput[] = [
-  account("assets:bank:fund", "asset", "Bank — mutual aid fund"),
-  account("assets:cash", "asset", "Cash box at the market stall"),
-  account("income:donations", "income", "Donations"),
-  account("income:grants", "income", "Grants"),
-  account("expenses:aid:food", "expense", "Aid — food"),
-  account("expenses:aid:rent", "expense", "Aid — rent"),
-  account("expenses:aid:school", "expense", "Aid — school canteen"),
-  account("expenses:aid:energy", "expense", "Aid — energy"),
-  account("expenses:operations", "expense", "Operations"),
-  account("equity:opening", "equity", "Opening equity"),
-];
+const CHART: readonly AccountInput[] = ([
+  ["assets:bank:fund", "asset", "Bank — mutual aid fund"],
+  ["assets:cash", "asset", "Cash box at the market stall"],
+  ["income:donations", "income", "Donations"],
+  ["income:grants", "income", "Grants"],
+  ["expenses:aid:food", "expense", "Aid — food"],
+  ["expenses:aid:rent", "expense", "Aid — rent"],
+  ["expenses:aid:school", "expense", "Aid — school canteen"],
+  ["expenses:aid:energy", "expense", "Aid — energy"],
+  ["expenses:operations", "expense", "Operations"],
+  ["equity:opening", "equity", "Opening equity"],
+] as const).map(([id, type, label]): AccountInput => ({ id, type, unit: EUR, label, normalBalance: side(type) }));
 
 /** A rule proposes an account; it never writes a posting (core law). */
+const rule = (id: string, value: string, accountId: string) =>
+  ({ id, when: { field: "memo", op: "contains", value }, then: { accountId }, frequency: "on-import" }) as const;
+
 const RULES = [
-  {
-    id: "donation",
-    when: { field: "memo", op: "contains", value: "Donation" },
-    then: { accountId: "income:donations" },
-    frequency: "on-import",
-  },
-  {
-    id: "food-voucher",
-    when: { field: "memo", op: "contains", value: "Food voucher" },
-    then: { accountId: "expenses:aid:food" },
-    frequency: "on-import",
-  },
-  {
-    id: "rent-aid",
-    when: { field: "memo", op: "contains", value: "Rent aid" },
-    then: { accountId: "expenses:aid:rent" },
-    frequency: "on-import",
-  },
-  {
-    id: "canteen",
-    when: { field: "memo", op: "contains", value: "Canteen" },
-    then: { accountId: "expenses:aid:school" },
-    frequency: "on-import",
-  },
-] as const;
+  rule("donation", "Donation", "income:donations"),
+  rule("food-voucher", "Food voucher", "expenses:aid:food"),
+  rule("rent-aid", "Rent aid", "expenses:aid:rent"),
+  rule("canteen", "Canteen", "expenses:aid:school"),
+];
 
 export const mutualAid: LedgerApp = defineLedger({
   name: "Mutual aid fund",
@@ -70,5 +44,6 @@ export const mutualAid: LedgerApp = defineLedger({
 });
 
 export const UNIT = "EUR";
+export const PERIOD = "2026";
 export const FUND_START = "2026-01-01";
 export const FUND_END = "2026-11-30";

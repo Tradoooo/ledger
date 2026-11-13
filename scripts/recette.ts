@@ -28,8 +28,9 @@ const CHART = defineChart([
 const DEVIATIONS: Record<string, string> = {
   properties: "The 10 000-run campaign is a local measurement, not a CI gate (CI runs the default 30-200 runs per property). "
     + "On this machine it lands on the LED-N-13 ceiling of 60 s; a shared runner would need the seeded subset.",
-  chain: "Pure-JS SHA-256 costs ~13 us for a 300-byte message, so 12 000 links cannot go below ~156 ms. "
-    + "WebCrypto would be faster but is asynchronous, and the core hashes synchronously on purpose.",
+  chain: "Pure-JS SHA-256 costs ~13 us for a 300-byte message, so 12 000 links cost 100-190 ms depending on the "
+    + "load of the machine (104 ms idle, 188 ms while five agents were running). WebCrypto would be faster but is "
+    + "asynchronous, and the core hashes synchronously on purpose. The acceptance run always prints the value of the day.",
 };
 
 const rows: { check: string; target: string; value: string; ok: boolean; deviation?: string }[] = [];

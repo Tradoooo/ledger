@@ -62,12 +62,45 @@ four ceiling raises, **14** published URLs, and its `views` extension point stil
 exists to not repeat that: a ceiling that does not move, three URLs, and a purity guard that names
 the application a concept belongs to.
 
+## 5 bis. The second pass (13 November, evening) — making the video true
+
+The first version of the project promised six things in its own video script that **no screen
+delivered**: a rule that learns, a reversal, a hand-written entry, an export, a projection as a
+range, and the "what this chain does not prove" paragraph *on the public page*. A jury that
+opened the repository after the video would have found six gaps. The second pass closed them:
+
+| Delivered | Where |
+|---|---|
+| `EntryForm` (shared), `publicPage` (a standalone HTML document), `errorSentence` | `packages/ui` |
+| Learned rules with their usage counter, reversal from the journal, export/import `.ledger.json`, projection as a range | `apps/envelopes` |
+| Manual entry, the "what it proves / does not prove" box, the downloadable public page, the printable annual statement with totals in words | `apps/mutual-aid` |
+| Manifest, service worker and icon on the three sites (one generator, no application file touched) | `scripts/pwa.mjs` |
+| Eight end-to-end tests against the **build**: the whole household gesture, the fund gesture, keyboard, mobile, reduced motion | `e2e/` |
+
+Two things the machine caught that the eye did not:
+
+1. **The overflow debt, repaid in one line of CSS.** The e2e suite recorded nine views wider than a
+   phone (up to 688 px instead of 390). The fix belonged to the shared stylesheet — `min-width: 0`
+   on the grid children, a scroll container on the cards, hashes that wrap — and it removed the
+   whole debt: **16/16 views now fit in 390 px**, and `e2e/known-overflows.json` is empty.
+2. **A contrast regression that the theme introduced.** The `ink-paper` theme set the shell's
+   colours but not its background, so light text landed on light paper: one *serious* axe
+   violation on the fund's page. The acceptance run failed on it; the fix was one line
+   (`.bb-shell` paints `var(--paper)`).
+
+The spec-driven comparison was measured rather than asserted: `docs/spec-vs-vibe.md`, with both
+implementations published. The honest result is that **the spec did not make it faster** (27 min 59 s
+against 27 min 00 s) — it made the result narrower (194 lines against 215, 21 tests against 16) and
+it made the output fit the house rules (no deep import), which the one-paragraph version did not.
+
 ## 6. What did not work
 
 - Eight specs before any code: right for the contract and the journal, ceremony for `ledger-reports`
   and `ledger-ui`, whose design came out of the tests instead.
 - The purity guard's first run flagged the contract file itself. Weakening the rule would have
   removed the only guard on direction; the annotated exception is the fix.
+- The applications are now **full**: `envelopes` 596/600 and `mutual-aid` 598/600. The next feature
+  will have to be paid for by a subtraction, in an application, not by a rise of the ceiling.
 - The property that the chain verifies after appends first failed for a *test* reason: with fewer
   than two entries the tampering index did not exist. The generator now produces at least two
   entries — a reminder that a property can pass or fail for reasons unrelated to the code it guards.

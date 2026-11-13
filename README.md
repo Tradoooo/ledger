@@ -3,8 +3,21 @@
 > **Σ postings = 0.** The journal is append-only and hash-chained. Every balance is a fold.
 > Nothing is ever edited: a correction is a reversal.
 
-Kiroween 2026 · **Skeleton Crew** · MIT · three published pages, no account, no server,
-no network request after loading.
+Kiroween 2026 · **Skeleton Crew** · MIT · three published applications, an index and a proof page;
+no account, no server, no network request after loading.
+
+## The map of this repository
+
+| You want | Read |
+|---|---|
+| What can I see, and what proves it | [`docs/FEATURES.md`](docs/FEATURES.md) |
+| Every claim and its proof | [`docs/PROOFS.md`](docs/PROOFS.md) |
+| Where it sits next to existing tools | [`docs/COMPARISON.md`](docs/COMPARISON.md) |
+| The stranger test (a third app in 16 min 32 s) | [`docs/UNKNOWN-ROOM.md`](docs/UNKNOWN-ROOM.md) |
+| Start again on a new machine | [`REPRODUCE.md`](REPRODUCE.md) |
+| The three decisions that shape the code | [`docs/adr/`](docs/adr/) |
+| Contest texts: video, submission | [`docs/video-script.md`](docs/video-script.md) · [`docs/devpost-form.md`](docs/devpost-form.md) |
+| What was used from Kiro, and what failed | [`KIRO_JOURNAL.md`](KIRO_JOURNAL.md) |
 
 ## The idea in one page
 
@@ -14,11 +27,11 @@ opinions — which is exactly what property-based tests need to be worth somethi
 
 | | `apps/envelopes` | `apps/mutual-aid` |
 |---|---|---|
-| Who | a household, on a phone | a solidarity fund, 6 volunteers, 180 donors |
+| Who | a household, on a phone | a solidarity fund: donors on one side, aid on the other |
 | Trust model | **everything private** — the trust comes from silence | **everything public** — the trust comes from proof |
-| Data | 12 000 imported bank lines, 9 envelopes | 214 hand-written entries, plain-language notes |
+| Data | 12 000 imported bank lines, 6 envelopes | 214 entries, plain-language notes |
 | Question answered | "can I still spend tomorrow?" — one number | "where did the money go?" — a verifiable chain |
-| Share | nothing leaves the browser | a static public page + `{entryId, hash}` receipt |
+| Share | nothing leaves the browser | a redacted static page + an `{entryId, hash}` receipt |
 
 Both use the **same core**, unmodified. Each application writes **one configuration file** and
 its screens. That is the whole category claim, and `.github/checks/purity.mjs` enforces it:
@@ -38,13 +51,14 @@ no application concept may live in `packages/**`.
 
 ## What is proven (and how)
 
-Every line below is produced by a script, not by hand — see [`docs/PROOFS.md`](docs/PROOFS.md)
-and the published [`/proof.html`](https://tradoooo.github.io/ledger/proof.html).
+Every line below is produced by a script, not by hand — the full table is in
+[`docs/PROOFS.md`](docs/PROOFS.md), and the published [`/proof.html`](https://tradoooo.github.io/ledger/proof.html)
+is generated from `docs/proofs.json`, so it cannot drift.
 
 - `Σ postings = 0` for every entry, and a typed `UnbalancedEntry` naming the exact gap otherwise.
 - The hash chain verifies after any sequence of appends and reversals; a tampered record is
   reported at its index with a reason.
-- Balances are order-independent (a fold), a snapshot replays to the same balances and the same head.
+- Balances are order-independent (a fold); a snapshot replays to the same balances and the same head.
 - 24 simulated months of envelope rollover conserve value, and spending `leftToday` every
   remaining day never puts the month in deficit.
 - A public view is irreversible: no private marker, no `party.id`, no source fingerprint.
@@ -58,29 +72,35 @@ and the published [`/proof.html`](https://tradoooo.github.io/ledger/proof.html).
 
 | Package | Lines | Ceiling | Fill |
 |---|---|---|---|
-| `packages/core` | 1 369 | 1 500 | 91 % |
-| `packages/ui` | 699 | 1 500 | 47 % |
+| `packages/core` | 1 399 | 1 500 | 93 % |
+| `packages/ui` | 1 026 | 1 500 | 68 % |
 | `skeleton` | 61 | 200 | 31 % |
-| **skeleton total** | **2 129** | **3 200** | 67 % |
-| `apps/envelopes` (its own lines) | 401 | 600 | 67 % |
-| `apps/mutual-aid` (its own lines) | 560 | 600 | 93 % |
-| `apps/time-bank` (third app, unpublished) | 542 | 600 | 90 % |
+| **skeleton total** | **2 486** | **3 200** | 78 % |
+| `apps/envelopes` (its own lines) | 596 | 600 | 99 % |
+| `apps/mutual-aid` (its own lines) | 598 | 600 | 100 % |
+| `apps/time-bank` (third app, unpublished) | 543 | 600 | 91 % |
 
-`node .github/checks/loc-budget.mjs` fails the build when a budget is exceeded, and the only
-accepted fix is **removing code**. The rules that keep the skeleton lean are in
+Measured with `node .github/checks/loc-budget.mjs` on 13 November 2026, on the working tree; the
+command is the authority, and the numbers move with the code. The guard fails the build
+when a budget is exceeded, and the only accepted fix is **removing code** (see
+[ADR 0002](docs/adr/0002-immutable-ceiling.md)). The rules that keep the skeleton lean are in
 [`.kiro/steering/lean.md`](.kiro/steering/lean.md), with a reason for every refusal.
 
 ## By the numbers
 
-| | |
+| | Source |
 |---|---|
-| Tests and properties | **95** in 8 files, every property seeded; 20 extra seeds × 200 runs, all green |
-| Measured acceptance run | **12/12** checks (`npx vite-node scripts/recette.ts`), 2 documented deviations |
-| Third application | built in **16 min 32 s** without touching `packages/**` |
-| Proofs re-run by `pnpm proof` | **8/8** |
-| Bundle, gzipped | skeleton **104 kB** · envelopes **109 kB** · mutual-aid **105 kB** (ceiling 220) |
-| Published pages | **3** + index + `/proof.html`, verified at 390×844 with no console error and no foreign request |
-| Dependencies at runtime | **1** (`zod`) + React |
+| **95** tests in the 8 core files, every property seeded — `pnpm test` reported **138** in 11 files, the extras being `packages/ui` and the git-ignored `scratch/` | `pnpm test` · `docs/proofs.json` |
+| **12/12** acceptance checks, 2 documented deviations | `npx vite-node scripts/recette.ts` → `docs/recette.json` |
+| Import of 12 000 lines: **383 ms**, 0 rejected | `docs/recette.json`, check `import` |
+| Trial balance: **5 815 396 = 5 815 396** | `docs/recette.json`, check `balance` |
+| Chain of 12 000 links: **402 ms** (target `< 150 ms`, deviation written) | `docs/recette.json`, check `chain` |
+| Public view: **16 566 B gzip**, 0 private marker | `docs/recette.json`, check `public` |
+| Network: **0** foreign request over 4 pages · a11y: **0 critical, 0 serious** | `docs/recette.json`, checks `network`, `a11y` |
+| Proofs re-run by `pnpm proof`: **8/8** | `docs/proofs.json` |
+| Bundle, gzipped: skeleton **102.7 kB** · envelopes **113.5 kB** · mutual-aid **110.5 kB** (ceiling 220) | `docs/proofs.json` |
+| Published pages: **3** + index + `/proof.html`, all answering 200 on 13 November 2026 | `node scripts/check-live.mjs` (the four application paths) |
+| Dependencies at runtime: **1** (`zod`) + React | `package.json` |
 
 ## Run it
 
@@ -92,10 +112,12 @@ pnpm fixtures   # regenerate the synthetic data (seed 20261103, byte for byte)
 pnpm build      # the three sites into dist/
 ```
 
+Step by step, with the expected output of each command: [`REPRODUCE.md`](REPRODUCE.md).
+
 ## Data
 
-Every fixture is synthetic and regenerable from a fixed seed; `fixtures/FICTIONAL.md` says so
-and `.github/checks/fixture-privacy.mjs` refuses any IBAN or valid card number. No real bank
+Every fixture is synthetic and regenerable from the fixed seed `20261103`; `fixtures/FICTIONAL.md`
+says so and `.github/checks/fixture-privacy.mjs` refuses any IBAN or valid card number. No real bank
 statement, no real donor, ever.
 
 ## Dependencies and licences
@@ -106,8 +128,9 @@ statement, no real donor, ever.
 | `react`, `react-dom` | MIT | the UI |
 | `vite`, `vitest`, `fast-check` (dev) | MIT | build, tests, properties |
 
-No chart library, no CSV library, no date library, no state manager, no database, no
-copyleft dependency.
+No chart library, no CSV library, no date library, no state manager, no database, no copyleft
+dependency. How this compares with Beancount, hledger, ledger-cli, Actual Budget, GnuCash and
+Firefly III: [`docs/COMPARISON.md`](docs/COMPARISON.md).
 
 ## Built with Kiro
 

@@ -1,0 +1,6 @@
+{
+  "about": "The horizontal overflow debt of the published views, measured at 390×844 on the built site.",
+  "reason": "Empty on 13 November 2026: the debt was repaid in packages/ui/src/styles.css (min-width: 0 on the grid children, a scroll container on the cards, hashes that wrap). The file stays as the place where a new debt is recorded, and the e2e suite refuses any view that overflows at all.",
+  "measuredOn": "2026-11-13",
+  "views": {}
+}

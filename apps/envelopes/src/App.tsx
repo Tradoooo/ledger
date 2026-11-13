@@ -1,189 +1,178 @@
-/** The six screens of « Household envelopes ». Rendering only: the core computes. */
-import { useCallback, useMemo, useState } from "react";
+/** Les écrans de « Household envelopes ». Câblage seulement : le core calcule, l'app affiche. */
+import { useMemo, useState } from "react";
 import {
-  auditTrail, envelopeReport, formatMinor, leftTodayMinor, matchRules, trialBalance, ulidFactory, verifyChain,
+  LedgerError, auditTrail, contra, envelopeReport, formatMinor, leftTodayMinor, trialBalance, verifyChain,
+  type Entry, type Journal,
 } from "@ledger/core";
-import type { Entry, Journal } from "@ledger/core";
-import {
-  AuditTrace, EnvelopeBoard, ImportWizard, JournalTable, NumberBand, ReportViews, Shell, t,
-} from "@ledger/ui";
+import { AuditTrace, EnvelopeBoard, EntryForm, ImportWizard, NumberBand, ReportViews, Shell, browserUlidFactory, errorSentence, t } from "@ledger/ui";
 import type { Locale, ShellTab } from "@ledger/ui";
+import { ClassifyScreen } from "./classify";
+import { JournalScreen } from "./journal";
 import ledger, { BANK_ACCOUNT, PERIOD, SALARY_ACCOUNT, UNIT, UNASSIGNED_ACCOUNT } from "./ledger.config";
-import { journalFrom, loadLedger, saveLedger, todayIso, withEntries } from "./store";
-import type { StoredLedger } from "./store";
+import { HISTORY, daysLeftIn, projection } from "./projection";
+import {
+  assignedJournal, assign, exportJson, forgetRule, importJson, journalFrom, lastEntry, learnFor, loadLedger,
+  proposals as pendingProposals, saveLedger, todayIso, withEntries, type Proposal, type StoredLedger,
+} from "./store";
 
-const MONTH_DAYS = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
+/** Un identifiant par geste : l'horloge et le hasard restent hors du core. */
+const nextId = browserUlidFactory();
+const options = () => ({ period: PERIOD, daysLeft: daysLeftIn(PERIOD, todayIso()) });
 
-function daysInMonth(period: string): number {
-  const year = Number(period.slice(0, 4));
-  const month = Number(period.slice(5, 7));
-  const leap = month === 2 && year % 4 === 0 && (year % 100 !== 0 || year % 400 === 0);
-  return leap ? 29 : (MONTH_DAYS[month - 1] ?? 30);
-}
+/** Le livre, ses dérivés et les cinq gestes : un seul endroit, lisible d'un coup d'œil. */
+const useBook = () => {
+  const [stored, setStored] = useState<StoredLedger>(loadLedger);
+  const [tab, setTab] = useState("overview");
+  const [notice, setNotice] = useState<string | null>(null);
+  const recorded = useMemo(() => journalFrom(stored), [stored]);
+  const journal = useMemo(() => assignedJournal(stored), [stored]);
+  const todo = useMemo(() => pendingProposals(recorded, stored, ledger.rules), [recorded, stored]);
+  const reversed = useMemo(() => new Set(recorded.records.flatMap((r) => (r.reverses === null ? [] : [r.reverses]))), [recorded]);
+  const commit = (next: StoredLedger): void => { saveLedger(next); setStored(next); };
 
-/** Remaining days of the period; a period not started is counted whole, a closed one is zero. */
-function daysLeftIn(period: string, today: string): number {
-  const total = daysInMonth(period);
-  if (today.startsWith(period)) return Math.max(0, total - Number(today.slice(8, 10)));
-  return today < `${period}-01` ? total : 0;
-}
+  const onImported = (entries: readonly Entry[]): void => {
+    commit(withEntries(stored, entries));
+    setNotice(`${entries.length} écriture(s) importée(s) : à affecter dans « À classer » avant de compter.`);
+  };
 
-/** A rule proposes the account of the unassigned leg; the posting is rewritten here, not by the core. */
-function classify(entry: Entry): Entry {
-  const leg = entry.postings.find((posting) => posting.accountId === UNASSIGNED_ACCOUNT);
-  if (leg === undefined) return entry;
-  const match = matchRules(ledger.rules, { memo: entry.note, amountMinor: leg.amountMinor });
-  if (match === undefined || match.then.accountId === UNASSIGNED_ACCOUNT) return entry;
-  const target = match.then.accountId;
-  return { ...entry, postings: entry.postings.map((p) => (p.id === leg.id ? { ...p, accountId: target } : p)) };
-}
+  /** Une correction apprend une règle (`learnRule`) ; une confirmation nourrit le compteur d'usages. */
+  const onDecide = (proposal: Proposal, accountId: string): void => {
+    const corrected = accountId !== proposal.accountId;
+    const next = assign(stored, proposal.entryId, accountId, corrected ? null : proposal.ruleId);
+    commit(corrected ? learnFor(next, proposal.note, accountId, nextId()) : next);
+    setNotice(corrected ? `Règle apprise : « ${proposal.note} » → ${accountId}.` : `Affectation confirmée : ${accountId}.`);
+  };
 
-function envelopeOptions(daysLeft: number) {
-  return { period: PERIOD, daysLeft };
-}
+  const onReverse = (targetId: string, note: string): string | null => {
+    if (note.trim() === "") return "La note est obligatoire : elle dit pourquoi l'écriture est corrigée.";
+    try {
+      const after = contra(recorded, targetId, { id: nextId(), date: todayIso(), note: note.trim() });
+      commit(withEntries(stored, [lastEntry(after)]));
+      setNotice("Contre-passation ajoutée : l'originale et sa correction restent au journal.");
+      return null;
+    } catch (cause) {
+      const code = cause instanceof LedgerError ? cause.code : "NotBalanced";
+      return `${errorSentence(code, cause instanceof LedgerError ? cause.detail : {})} : rien n'a été écrit.`;
+    }
+  };
 
+  const onForget = (ruleId: string): void => commit(forgetRule(stored, ruleId));
+
+  /** Une écriture saisie à la main rejoint le livre, puis attend son affectation. */
+  const onCreate = (entry: Entry): void => {
+    const waiting = entry.postings.some((posting) => posting.accountId === UNASSIGNED_ACCOUNT);
+    commit(withEntries(stored, [entry]));
+    setNotice(waiting ? `Écriture ajoutée : « ${entry.note} » attend son affectation.` : `Écriture ajoutée : « ${entry.note} ».`);
+  };
+
+  const onExport = (): void => {
+    const url = URL.createObjectURL(new Blob([exportJson(stored)], { type: "application/json" }));
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `foyer-${stored.createdAt}.ledger.json`;
+    link.click();
+    URL.revokeObjectURL(url);
+    setNotice("Livre exporté : c'est votre seule sauvegarde, gardez ce fichier.");
+  };
+
+  const onFile = (file: File): void => {
+    void file.text().then((text) => {
+      const outcome = importJson(text, stored);
+      if (!outcome.ok) { setNotice(outcome.message); return; }
+      commit(outcome.stored);
+      const ignored = outcome.ignored > 0 ? `, ${outcome.ignored} illisible(s) ignorée(s)` : "";
+      setNotice(`Livre reconstruit : ${outcome.stored.entries.length} écriture(s)${ignored}.`);
+    });
+  };
+
+  return { tab, setTab, notice, recorded, journal, todo, reversed, learned: stored.rules, onImported, onDecide, onReverse, onForget, onCreate, onExport, onFile };
+};
+
+/** Les deux boutons de sauvegarde : le fichier exporté est la seule copie qui survit. */
+const BackupBar = ({ onExport, onFile }: { onExport: () => void; onFile: (file: File) => void }) => (
+  <>
+    <button className="bb-btn" type="button" onClick={onExport}>Exporter</button>
+    <label className="bb-pill">
+      Importer{" "}
+      <input type="file" accept=".json,application/json" hidden onChange={(event) => {
+        const file = event.target.files?.[0];
+        event.target.value = "";
+        if (file !== undefined) onFile(file);
+      }} />
+    </label>
+  </>
+);
+
+/** Le chiffre d'abord, la projection en fourchette juste à côté (LED-F-16, LED-F-17). */
 function Overview({ journal, locale }: { journal: Journal; locale: Locale }) {
-  const options = envelopeOptions(daysLeftIn(PERIOD, todayIso()));
-  const report = envelopeReport(journal, ledger.chart, ledger.envelopes, options);
-  const left = leftTodayMinor(journal, ledger.chart, ledger.envelopes, options);
+  const left = leftTodayMinor(journal, ledger.chart, ledger.envelopes, options());
+  const band = projection(journal, PERIOD, todayIso(), ledger.envelopes.envelopes.map((env) => env.accountId));
+  const months = band.periods.length === 0 ? "aucun mois exploitable" : band.periods.join(", ");
   return (
     <>
-      <NumberBand
-        label={t(locale, "leftToday")}
-        valueMinor={left}
-        unit={UNIT}
-        locale={locale}
-        hint={t(locale, "leftToday.hint")}
-      />
-      <section className="env-summary">
-        <h2>{t(locale, "tab.envelopes")} — {t(locale, "report.period")} {report.period}</h2>
-        <table>
-          <thead>
-            <tr>
-              <th scope="col">{t(locale, "tab.envelopes")}</th>
-              <th scope="col">{t(locale, "report.budget")}</th>
-              <th scope="col">{t(locale, "report.spent")}</th>
-              <th scope="col">{t(locale, "report.available")}</th>
-            </tr>
-          </thead>
-          <tbody>
-            {report.rows.map((row) => (
-              <tr key={row.envelopeId}>
-                <th scope="row">{row.label}</th>
-                <td>{formatMinor(row.budgetMinor, report.unit, locale)}</td>
-                <td>{formatMinor(row.spentMinor, report.unit, locale)}</td>
-                <td>{formatMinor(row.availableMinor, report.unit, locale)}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-        {report.rows.length === 0 ? <p>{t(locale, "envelopes.empty")}</p> : null}
-        <p className="env-summary-meta">
-          {t(locale, "leftToday")} · {report.daysLeft} jour(s) restant(s) sur {daysInMonth(PERIOD)}.
-        </p>
-      </section>
-    </>
-  );
-}
-
-function Envelopes({ journal, locale }: { journal: Journal; locale: Locale }) {
-  const report = envelopeReport(journal, ledger.chart, ledger.envelopes, envelopeOptions(daysLeftIn(PERIOD, todayIso())));
-  return <EnvelopeBoard report={report} locale={locale} />;
-}
-
-function JournalScreen({ journal, locale }: { journal: Journal; locale: Locale }) {
-  return <JournalTable records={journal.records} locale={locale} limit={100} />;
-}
-
-function ImportScreen({ journal, onImported, locale }: {
-  journal: Journal; onImported: (entries: readonly Entry[]) => void; locale: Locale;
-}) {
-  const evidence = useMemo(
-    () => journal.records.flatMap((record) => record.postings.flatMap((posting) => posting.evidence ?? [])),
-    [journal],
-  );
-  const factory = useMemo(
-    () => ulidFactory(() => Date.now(), () => crypto.getRandomValues(new Uint8Array(10))),
-    [],
-  );
-  const idFactory = useCallback(() => factory(), [factory]);
-  return (
-    <ImportWizard
-      unit={UNIT}
-      accountId={BANK_ACCOUNT}
-      debitAccountId={UNASSIGNED_ACCOUNT}
-      creditAccountId={SALARY_ACCOUNT}
-      locale={locale}
-      existingEvidence={evidence}
-      idFactory={idFactory}
-      onImported={(entries) => onImported(entries)}
-    />
-  );
-}
-
-/** The date window the reports fold on: what the journal actually contains, else the period. */
-function windowOf(journal: Journal): { from: string; to: string } {
-  const dates = journal.records.map((record) => record.date).sort();
-  const from = dates[0] ?? `${PERIOD}-01`;
-  return { from, to: dates.at(-1) ?? from };
-}
-
-function ReportsScreen({ journal, locale }: { journal: Journal; locale: Locale }) {
-  const { to } = windowOf(journal);
-  const report = useMemo(() => trialBalance(journal, ledger.chart, { asOf: to, unit: UNIT }), [journal, to]);
-  return <ReportViews report={report} locale={locale} />;
-}
-
-function AuditScreen({ journal, locale }: { journal: Journal; locale: Locale }) {
-  const { from, to } = windowOf(journal);
-  const report = useMemo(() => auditTrail(journal, { from, to }), [journal, from, to]);
-  const check = useMemo(() => verifyChain(journal), [journal]);
-  return (
-    <>
-      <AuditTrace report={report} locale={locale} />
-      <p className="audit-chain">
-        {check.ok
-          ? `Chaîne d'empreintes vérifiée : ${journal.records.length} écriture(s).`
-          : `Chaîne rompue à l'écriture n°${check.index + 1}.`}
-      </p>
+      <div className="bb-grid-2">
+        <NumberBand
+          label={t(locale, "leftToday")} valueMinor={left} unit={UNIT} locale={locale} hint={t(locale, "leftToday.hint")}
+        />
+        <section className="bb-card">
+          <h2>Projection de fin de mois — une fourchette</h2>
+          <p className="bb-band-value">{formatMinor(band.lowMinor, UNIT, locale)} – {formatMinor(band.highMinor, UNIT, locale)}</p>
+          <p>Médiane {formatMinor(band.medianMinor, UNIT, locale)} ± {formatMinor(band.spreadMinor, UNIT, locale)}, sur {months}.</p>
+          <p className="bb-sub">{band.periods.length < HISTORY
+            ? `Historique insuffisant : ${band.periods.length} mois sur ${HISTORY}, fourchette large.`
+            : "Médiane et écart des trois derniers mois : jamais un chiffre unique."}</p>
+        </section>
+      </div>
+      <p className="bb-sub">Seule sauvegarde : le fichier « .ledger.json » exporté. Rien n'est envoyé sur un serveur.</p>
     </>
   );
 }
 
 export function App() {
-  const [stored, setStored] = useState<StoredLedger>(() => loadLedger());
-  const [tab, setTab] = useState("overview");
+  const book = useBook();
   const locale: Locale = ledger.locale;
-  const journal = useMemo(() => journalFrom(stored), [stored]);
-  const onImported = useCallback((entries: readonly Entry[]) => {
-    const next = withEntries(stored, entries.map(classify));
-    saveLedger(next);
-    setStored(next);
-  }, [stored]);
   const tabs: ShellTab[] = [
-    { id: "overview", label: t(locale, "tab.overview") },
-    { id: "envelopes", label: t(locale, "tab.envelopes") },
-    { id: "journal", label: t(locale, "tab.journal") },
-    { id: "import", label: t(locale, "tab.import") },
-    { id: "reports", label: t(locale, "tab.reports") },
-    { id: "audit", label: t(locale, "tab.audit") },
+    { id: "overview", label: t(locale, "tab.overview") }, { id: "envelopes", label: t(locale, "tab.envelopes") }, { id: "journal", label: t(locale, "tab.journal") },
+    { id: "classify", label: `À classer (${book.todo.length})` }, { id: "import", label: t(locale, "tab.import") },
+    { id: "reports", label: t(locale, "tab.reports") }, { id: "audit", label: t(locale, "tab.audit") },
   ];
+  const chain = verifyChain(book.recorded);
+  const window = { from: book.recorded.records[0]?.date ?? `${PERIOD}-01`, to: book.recorded.records.at(-1)?.date ?? PERIOD };
   return (
     <Shell
-      theme={"warm-paper"}
-      title={ledger.name}
-      subtitle={`${t(locale, "report.period")} ${PERIOD}`}
-      locale={locale}
-      tabs={tabs}
-      activeTab={tab}
-      onTab={setTab}
+      theme="warm-paper" title={ledger.name} subtitle={`${t(locale, "report.period")} ${PERIOD}`} locale={locale}
+      tabs={tabs} activeTab={book.tab} onTab={book.setTab} actions={<BackupBar onExport={book.onExport} onFile={book.onFile} />}
     >
-      {tab === "overview" ? <Overview journal={journal} locale={locale} /> : null}
-      {tab === "envelopes" ? <Envelopes journal={journal} locale={locale} /> : null}
-      {tab === "journal" ? <JournalScreen journal={journal} locale={locale} /> : null}
-      {tab === "import" ? <ImportScreen journal={journal} onImported={onImported} locale={locale} /> : null}
-      {tab === "reports" ? <ReportsScreen journal={journal} locale={locale} /> : null}
-      {tab === "audit" ? <AuditScreen journal={journal} locale={locale} /> : null}
+      {book.notice === null ? null : <p className="bb-card" role="status">{book.notice}</p>}
+      {book.tab === "overview" ? <Overview journal={book.journal} locale={locale} /> : null}
+      {book.tab === "envelopes" ? (
+        <EnvelopeBoard report={envelopeReport(book.journal, ledger.chart, ledger.envelopes, options())} locale={locale} />
+      ) : null}
+      {book.tab === "journal" ? (
+        <JournalScreen records={book.recorded.records} reversed={book.reversed} locale={locale} onReverse={book.onReverse} />
+      ) : null}
+      {book.tab === "classify" ? (
+        <>
+          <ClassifyScreen proposals={book.todo} accounts={ledger.chart.accounts} learned={book.learned} unit={UNIT} locale={locale} onDecide={book.onDecide} onForget={book.onForget} />
+          <EntryForm accounts={ledger.chart.accounts} unit={UNIT} locale={locale} idFactory={() => nextId()} onCreate={book.onCreate} error={null} />
+        </>
+      ) : null}
+      {book.tab === "import" ? (
+        <ImportWizard
+          unit={UNIT} accountId={BANK_ACCOUNT} debitAccountId={UNASSIGNED_ACCOUNT} creditAccountId={SALARY_ACCOUNT}
+          locale={locale} idFactory={() => nextId()} onImported={book.onImported}
+          existingEvidence={book.recorded.records.flatMap((r) => r.postings.flatMap((p) => p.evidence ?? []))}
+        />
+      ) : null}
+      {book.tab === "reports" ? (
+        <ReportViews report={trialBalance(book.journal, ledger.chart, { asOf: window.to, unit: UNIT })} locale={locale} />
+      ) : null}
+      {book.tab === "audit" ? (
+        <>
+          <AuditTrace report={auditTrail(book.recorded, window)} locale={locale} />
+          <p className="bb-sub">{chain.ok ? `Chaîne d'empreintes vérifiée : ${book.recorded.records.length} écriture(s).` : `Chaîne rompue à l'écriture n°${chain.index + 1}.`}</p>
+        </>
+      ) : null}
     </Shell>
   );
 }

@@ -1,6 +1,6 @@
 {
-  "startedAt": "2026-11-13T18:06:09.168Z",
-  "finishedAt": "2026-11-13T18:06:10.727Z",
+  "startedAt": "2026-11-13T20:17:10.317Z",
+  "finishedAt": "2026-11-13T20:17:14.330Z",
   "proofs": [
     {
       "id": "purity",
@@ -15,17 +15,17 @@
     {
       "id": "line-budgets",
       "passed": true,
-      "detail": "ok   skeleton total   2159/3200"
+      "detail": "ok   skeleton total   2492/3200"
     },
     {
       "id": "lint",
       "passed": true,
-      "detail": "ok   lint: 61 files, no forbidden pattern"
+      "detail": "ok   lint: 70 files, no forbidden pattern"
     },
     {
       "id": "unit-tests",
       "passed": true,
-      "detail": "   Duration  930ms (transform 781ms, setup 0ms, collect 1.61s, tests 740ms, environment 1ms, prepare 2.32s)"
+      "detail": "   Duration  2.53s (transform 2.26s, setup 0ms, collect 10.38s, tests 4.99s, environment 2ms, prepare 1.98s)"
     },
     {
       "id": "contest",
@@ -35,12 +35,12 @@
     {
       "id": "line-budgets-json",
       "passed": true,
-      "detail": "ok   skeleton total   2159/3200"
+      "detail": "ok   skeleton total   2492/3200"
     },
     {
       "id": "bundle-budget",
       "passed": true,
-      "detail": "skeleton 102.7 kB · envelopes 109.3 kB · mutual-aid 105.6 kB"
+      "detail": "skeleton 102.7 kB · envelopes 113.5 kB · mutual-aid 110.5 kB"
     },
     {
       "id": "offline",

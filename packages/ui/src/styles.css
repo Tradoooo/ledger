@@ -17,7 +17,9 @@
 }
 * { box-sizing: border-box; }
 body { margin: 0; background: var(--paper); color: var(--ink); }
-.bb-shell { min-height: 100dvh; display: flex; flex-direction: column; }
+/* The theme lives on the shell, so the shell paints the background too: a themed app must not
+   keep the root background, or light text lands on light paper. */
+.bb-shell { min-height: 100dvh; display: flex; flex-direction: column; background: var(--paper); color: var(--ink); }
 .bb-header { border-bottom: 1px solid var(--rule); padding: .9rem 1.25rem; display: flex; gap: 1rem; flex-wrap: wrap; align-items: baseline; }
 .bb-header h1 { font-size: 1.15rem; margin: 0; }
 .bb-sub { color: var(--ink-soft); font-size: .92rem; }
@@ -26,15 +28,19 @@ body { margin: 0; background: var(--paper); color: var(--ink); }
 .bb-tab { border: 1px solid transparent; border-bottom: none; background: none; color: var(--ink-soft); font: inherit; padding: .45rem .8rem; border-radius: var(--radius) var(--radius) 0 0; cursor: pointer; }
 .bb-tab[aria-selected="true"] { color: var(--ink); background: var(--paper-alt); border-color: var(--rule); }
 .bb-main { padding: 1.25rem; display: grid; gap: var(--gap); max-width: 72rem; width: 100%; margin: 0 auto; }
+/* Grid children must be allowed to shrink, or a wide table widens the whole page. */
+.bb-main > * { min-width: 0; }
 .bb-band { background: var(--paper-alt); border: 1px solid var(--rule); border-radius: var(--radius); padding: 1.1rem 1.25rem; }
 .bb-band-label { font-size: .9rem; color: var(--ink-soft); margin: 0 0 .2rem; text-transform: uppercase; letter-spacing: .06em; }
 .bb-band-value { font-size: clamp(2rem, 6vw, 3.2rem); margin: 0; font-variant-numeric: tabular-nums; letter-spacing: -.02em; }
 .bb-band-hint { margin: .3rem 0 0; font-size: .92rem; color: var(--ink-soft); }
-.bb-card { background: var(--paper-alt); border: 1px solid var(--rule); border-radius: var(--radius); padding: 1rem; }
+.bb-card { background: var(--paper-alt); border: 1px solid var(--rule); border-radius: var(--radius); padding: 1rem; overflow-x: auto; }
 .bb-card h2 { margin: 0 0 .6rem; font-size: 1rem; }
 table.bb-table { width: 100%; border-collapse: collapse; font-size: .95rem; }
 .bb-table th, .bb-table td { text-align: left; padding: .35rem .5rem; border-bottom: 1px solid var(--rule); vertical-align: top; }
 .bb-table td.num, .bb-table th.num { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+/* A 64-character hash must wrap instead of widening the page. */
+.bb-table td code, .bb-table td.hash { overflow-wrap: anywhere; word-break: break-all; }
 .bb-table tbody tr:hover { background: color-mix(in srgb, var(--accent) 8%, transparent); }
 .bb-empty { color: var(--ink-soft); font-style: italic; }
 .bb-error { color: var(--bad); }

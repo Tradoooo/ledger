@@ -1,0 +1,31 @@
+name: seed-sweep
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+concurrency:
+  group: seed-sweep-${{ github.ref }}
+  cancel-in-progress: true
+permissions:
+  contents: read
+jobs:
+  seed-sweep:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: five seeds, two hundred runs each
+        env:
+          # The properties are only worth something if they hold for other seeds too; the
+          # 10 000-run campaign stays local, the CI sweeps five seeds inside five minutes.
+          LEDGER_RUNS: "200"
+        run: node scripts/seed-sweep.mjs 20261100 20261137 20261174 20261211 20261248

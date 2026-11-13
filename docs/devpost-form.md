@@ -41,7 +41,7 @@ No login, no account, no server, no network request after the page loads.
 
 ## How the "lean enough to be clear" claim is enforced
 
-- **2 129 lines of skeleton** (core 1 369 / ui 699 / skeleton 61) out of a 3 200 ceiling that has
+- **2 492 lines of skeleton** (core 1 399 / ui 1 026 / skeleton 61) out of a 3 200 ceiling that has
   never been raised; each application keeps its own lines under 600.
 - A CI guard fails the build on any increase. The only accepted fix is to remove code
   (`node .github/checks/loc-budget.mjs`).
@@ -52,16 +52,17 @@ No login, no account, no server, no network request after the page loads.
 
 | Check | Value |
 |---|---|
-| Import of 3 years of statement (12 000 lines) | **504 ms**, 0 rejected |
+| Import of 3 years of statement (12 000 lines) | **190–227 ms**, 0 rejected |
 | Trial balance | debit **5 815 396** = credit **5 815 396** |
-| Hash chain over 12 000 links | **181 ms**, ok (see deviation in `KIRO_JOURNAL.md`) |
+| Hash chain over 12 000 links | **104 ms idle, 188 ms under load** — the acceptance run prints the value of the day |
 | Tampering | detected at seq 4 287, reason `bad-hash` |
 | Immutability | assignment throws; `contra()` leaves the original hash unchanged |
 | Snapshot + replay | identical balances, identical head |
 | Public view | **16.6 kB gzip**, 0 private marker, 0 private id, 0 fingerprint |
 | Network | **0** request on the 4 pages |
 | Accessibility | **0 critical, 0 serious** (axe, WCAG 2.0/2.1 AA) |
-| Tests + properties | **95** tests, properties at 10 000 runs each, 20 extra seeds × 200 runs, all green |
+| Tests + properties | **138** unit tests + **8** end-to-end tests, properties at 10 000 runs each, 20 extra seeds × 200 runs, all green |
+| Mobile layout | **16/16** views fit inside 390 px (the overflow debt was repaid, and the e2e suite refuses a new one) |
 
 ## Built with Kiro
 
