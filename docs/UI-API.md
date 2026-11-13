@@ -70,3 +70,52 @@ Head hash in a `<code>` block with a copy button, then the rows (seq, date, note
 - colour never carries information alone;
 - `font-variant-numeric: tabular-nums` on every figure;
 - everything must survive print (`@media print` already hides tabs and buttons).
+
+## EntryForm (added 13 November)
+
+```tsx
+import { EntryForm } from "@ledger/ui";
+import type { Entry } from "@ledger/core";
+
+<EntryForm
+  accounts={readonly { id: string; label: string; type: string }[]}   // chart.accounts
+  unit={"EUR"}
+  locale={Locale}
+  idFactory={() => string}                                             // one id per entry
+  onCreate={(entry: Entry) => void}                                    // the app appends it
+  error={string | null}                                                // message from the core
+/>
+```
+
+Two postings at least, one amount field, a date, a note, a debit account and a credit account.
+The **sum is shown live** (`Σ = 0` required) and the form refuses to submit otherwise. When `error`
+is set, the message is displayed with `role="alert"` — the sentence comes from the core
+(`describeError`), never a raw code.
+
+## PublicPage (added 13 November)
+
+```ts
+import { publicPage } from "@ledger/ui";
+
+const html = publicPage({
+  title: "Annual report of the fund",
+  journal: redactedJournal,
+  period: "2026",
+  unit: "EUR",
+  locale: "en",
+  note: "What this chain proves — and what it does not prove.",   // printed under the table
+});
+```
+
+Returns a **standalone HTML document**: inline CSS, no script, no external resource, no font.
+It contains the table of entries, the head hash, the period totals, and the `note` paragraph.
+The output is what a donor can save, print or host as a single file.
+
+## errorSentence (added 13 November)
+
+```ts
+import { errorSentence } from "@ledger/ui";
+errorSentence("UnbalancedEntry", { sum: -40 })  // → "This entry does not sum to zero. The postings sum to -40, not zero."
+```
+Built on `describeError` from `@ledger/core`, translated in the UI dictionary when a key exists,
+English sentence otherwise.

@@ -11,4 +11,5 @@ export * from "./rules.js";
 export * from "./envelopes.js";
 export * from "./reports.js";
 export * from "./csv.js";
+export * from "./errors.js";
 export * from "./view.js";

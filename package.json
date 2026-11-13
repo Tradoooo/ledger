@@ -15,7 +15,12 @@
     "check": "pnpm typecheck && pnpm lint && pnpm guards && pnpm test",
     "fixtures": "node scripts/gen-fixtures.mjs",
     "build": "node scripts/build.mjs",
-    "dev": "node scripts/build.mjs --serve"
+    "dev": "node scripts/build.mjs --serve",
+    "recette": "vite-node scripts/recette.ts",
+    "sweep": "node scripts/seed-sweep.mjs",
+    "smoke": "node scripts/smoke.mjs",
+    "e2e": "node scripts/e2e.mjs",
+    "record": "node scripts/record-demo.mjs"
   },
   "devDependencies": {
     "@axe-core/playwright": "^4.14.0",
