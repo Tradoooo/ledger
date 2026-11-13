@@ -2,7 +2,7 @@
 /** Every claim gets a proof. Writes docs/proofs.json and fails on the first red line. */
 import { spawnSync } from "node:child_process";
 import { gzipSync } from "node:zlib";
-import { readdirSync, readFileSync, statSync, writeFileSync, mkdirSync } from "node:fs";
+import { existsSync, readdirSync, readFileSync, statSync, writeFileSync, mkdirSync } from "node:fs";
 import { join } from "node:path";
 
 const TIMEOUT_MS = 240_000;
@@ -51,6 +51,19 @@ for (const site of ["skeleton", "envelopes", "mutual-aid"]) {
 const measured = sizes.filter((s) => s.gzipKb !== null);
 const over = measured.filter((s) => s.gzipKb > 220);
 add("bundle-budget", measured.length > 0 && over.length === 0, measured.length === 0 ? "not built yet" : measured.map((s) => `${s.site} ${s.gzipKb} kB`).join(" · "));
+
+const offline = [];
+for (const site of ["skeleton", "envelopes", "mutual-aid"]) {
+  const dir = join("dist", site);
+  const files = ["manifest.webmanifest", "sw.js", "icon.svg"].filter((name) => existsSync(join(dir, name)));
+  const html = existsSync(join(dir, "index.html")) ? readFileSync(join(dir, "index.html"), "utf8") : "";
+  offline.push({ site, ready: files.length === 3 && html.includes("manifest.webmanifest") && html.includes("serviceWorker") });
+}
+const offlineReady = offline.filter((o) => o.ready).length;
+add("offline", offlineReady === offline.length && offline.length > 0, offlineReady === 0 ? "not built yet" : `${offlineReady}/${offline.length} sites carry a manifest, a service worker and an icon`);
+
+const recette = existsSync("docs/recette.json") ? JSON.parse(readFileSync("docs/recette.json", "utf8")) : null;
+add("acceptance", recette !== null && recette.checks.every((c) => c.ok), recette === null ? "run `pnpm recette` first" : `${recette.checks.filter((c) => c.ok).length}/${recette.checks.length} checks passed (${recette.checks.filter((c) => c.deviation).length} documented deviation(s))`);
 
 const report = { startedAt, finishedAt: new Date().toISOString(), proofs, passed: proofs.filter((p) => p.passed).length, total: proofs.length };
 mkdirSync("docs", { recursive: true });

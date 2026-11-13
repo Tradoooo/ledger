@@ -3,6 +3,7 @@
 import { spawnSync } from "node:child_process";
 import { existsSync } from "node:fs";
 import { resolve } from "node:path";
+import { applyPwa } from "./pwa.mjs";
 
 const SITES = [
   { name: "skeleton", dir: "skeleton" },
@@ -19,5 +20,6 @@ for (const site of SITES) {
     cwd: site.dir, stdio: "inherit", timeout: 240_000,
   });
   if (result.status !== 0) failed = true;
+  else applyPwa(resolve("dist", site.name), `Ledger ${site.name}`);
 }
 process.exit(failed ? 1 : 0);

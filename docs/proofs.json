@@ -1,6 +1,6 @@
 {
-  "startedAt": "2026-11-13T15:36:30.026Z",
-  "finishedAt": "2026-11-13T15:36:34.699Z",
+  "startedAt": "2026-11-13T18:06:09.168Z",
+  "finishedAt": "2026-11-13T18:06:10.727Z",
   "proofs": [
     {
       "id": "purity",
@@ -15,17 +15,17 @@
     {
       "id": "line-budgets",
       "passed": true,
-      "detail": "ok   skeleton total   2129/3200"
+      "detail": "ok   skeleton total   2159/3200"
     },
     {
       "id": "lint",
       "passed": true,
-      "detail": "ok   lint: 60 files, no forbidden pattern"
+      "detail": "ok   lint: 61 files, no forbidden pattern"
     },
     {
       "id": "unit-tests",
       "passed": true,
-      "detail": "   Duration  2.01s (transform 1.35s, setup 0ms, collect 5.24s, tests 2.30s, environment 1ms, prepare 1.49s)"
+      "detail": "   Duration  930ms (transform 781ms, setup 0ms, collect 1.61s, tests 740ms, environment 1ms, prepare 2.32s)"
     },
     {
       "id": "contest",
@@ -35,14 +35,24 @@
     {
       "id": "line-budgets-json",
       "passed": true,
-      "detail": "ok   skeleton total   2129/3200"
+      "detail": "ok   skeleton total   2159/3200"
     },
     {
       "id": "bundle-budget",
       "passed": true,
-      "detail": "skeleton 102.4 kB · envelopes 109 kB · mutual-aid 105.3 kB"
+      "detail": "skeleton 102.7 kB · envelopes 109.3 kB · mutual-aid 105.6 kB"
+    },
+    {
+      "id": "offline",
+      "passed": true,
+      "detail": "3/3 sites carry a manifest, a service worker and an icon"
+    },
+    {
+      "id": "acceptance",
+      "passed": true,
+      "detail": "12/12 checks passed (2 documented deviation(s))"
     }
   ],
-  "passed": 8,
-  "total": 8
+  "passed": 10,
+  "total": 10
 }
