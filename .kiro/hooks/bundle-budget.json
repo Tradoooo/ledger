@@ -1,0 +1,7 @@
+{
+  "name": "bundle-budget",
+  "version": "1",
+  "trigger": "postTaskExecution",
+  "matcher": ["*"],
+  "action": { "type": "runCommand", "command": "node scripts/run-proofs.mjs" }
+}

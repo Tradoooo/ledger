@@ -1,0 +1,8 @@
+{
+  "name": "@ledger/skeleton",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "dependencies": { "@ledger/core": "workspace:*", "@ledger/ui": "workspace:*", "react": "^19.0.0", "react-dom": "^19.0.0" },
+  "devDependencies": { "vite": "^7.0.0", "@vitejs/plugin-react": "^5.0.0" }
+}

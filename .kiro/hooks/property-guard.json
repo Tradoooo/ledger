@@ -1,0 +1,7 @@
+{
+  "name": "property-guard",
+  "version": "1",
+  "trigger": "postToolUse",
+  "matcher": ["fs_write"],
+  "action": { "type": "runCommand", "command": "npx vitest run --dir packages/core/src -t property" }
+}

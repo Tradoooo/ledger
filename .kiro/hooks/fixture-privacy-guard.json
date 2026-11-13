@@ -1,0 +1,7 @@
+{
+  "name": "fixture-privacy-guard",
+  "version": "1",
+  "trigger": "fileEdited",
+  "matcher": ["fixtures/**"],
+  "action": { "type": "runCommand", "command": "node .github/checks/fixture-privacy.mjs" }
+}

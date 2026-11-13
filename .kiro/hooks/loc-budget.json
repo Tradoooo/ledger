@@ -1,0 +1,7 @@
+{
+  "name": "loc-budget",
+  "version": "1",
+  "trigger": "fileEdited",
+  "matcher": ["packages/**/*.ts", "packages/**/*.tsx", "apps/**/*.tsx", "skeleton/**/*.tsx"],
+  "action": { "type": "runCommand", "command": "node .github/checks/loc-budget.mjs" }
+}

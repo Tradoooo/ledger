@@ -1,0 +1,22 @@
+{
+  "extends": "./tsconfig.base.json",
+  "compilerOptions": {
+    "noEmit": true,
+    "baseUrl": ".",
+    "paths": {
+      "@ledger/core": ["packages/core/src/index.ts"],
+      "@ledger/ui": ["packages/ui/src/index.ts"]
+    }
+  },
+  "include": [
+    "packages/*/src/**/*.ts",
+    "packages/*/src/**/*.tsx",
+    "apps/*/src/**/*.ts",
+    "apps/*/src/**/*.tsx",
+    "skeleton/src/**/*.ts",
+    "skeleton/src/**/*.tsx",
+    "skeleton/*.ts",
+    "apps/*/*.ts",
+    "scripts/**/*.mjs"
+  ]
+}
