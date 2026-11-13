@@ -53,17 +53,28 @@ and the published [`/proof.html`](https://tradoooo.github.io/ledger/proof.html).
 
 ## Budgets (the ceiling never goes up)
 
-| Package | Lines | Ceiling |
-|---|---|---|
-| `packages/core` | see `pnpm guards` | 1 500 |
-| `packages/ui` | see `pnpm guards` | 1 500 |
-| `skeleton` | see `pnpm guards` | 200 |
-| **skeleton total** | | **3 200** |
-| each application | | 600 |
+| Package | Lines | Ceiling | Fill |
+|---|---|---|---|
+| `packages/core` | 1 351 | 1 500 | 90 % |
+| `packages/ui` | 691 | 1 500 | 46 % |
+| `skeleton` | 61 | 200 | 31 % |
+| **skeleton total** | **2 103** | **3 200** | 66 % |
+| `apps/envelopes` (its own lines) | 401 | 600 | 67 % |
+| `apps/mutual-aid` (its own lines) | 560 | 600 | 93 % |
 
 `node .github/checks/loc-budget.mjs` fails the build when a budget is exceeded, and the only
 accepted fix is **removing code**. The rules that keep the skeleton lean are in
 [`.kiro/steering/lean.md`](.kiro/steering/lean.md), with a reason for every refusal.
+
+## By the numbers
+
+| | |
+|---|---|
+| Tests and properties | **95** in 8 files, every property seeded |
+| Proofs re-run by `pnpm proof` | **8/8** |
+| Bundle, gzipped | skeleton **104 kB** · envelopes **109 kB** · mutual-aid **105 kB** (ceiling 220) |
+| Published pages | **3** + index + `/proof.html`, verified at 390×844 with no console error and no foreign request |
+| Dependencies at runtime | **1** (`zod`) + React |
 
 ## Run it
 
