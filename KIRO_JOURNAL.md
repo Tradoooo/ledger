@@ -26,8 +26,22 @@ Measures are produced by scripts, never typed by hand:
 
 ## 3. What the properties found
 
-Filled with real counter-examples only, each with its seed. An empty section is better than an
-invented one; it stays empty until a property actually fails.
+**The honest answer: no product counter-example surfaced after the invariants were formalised, and
+that is a fact, not an omission.**
+
+- The 15 properties of the cahier (`LED-P-01` … `LED-P-15`) run at 10 000 cases each in the
+  acceptance campaign (74 s locally, `LEDGER_RUNS=10000`) and at **20 further seeds × 200 runs**
+  (`node scripts/seed-sweep.mjs`): all green.
+- One property did fail, and it was a **test** fault, not a product fault: the chain property
+  generated fewer than two entries, so the tampering index did not exist. The generator now
+  produces at least two entries.
+- What the properties *did* find is written down in `docs/UNKNOWN-ROOM.md`: five edges of the
+  skeleton found by a third application, not by a test. Two of them were fixed afterwards — the
+  core now accepts any application name in `View.app` (a core that knows its applications is a
+  core that will grow application code), and the theme of `definePresentation` now has an effect
+  (`data-theme` on the shell).
+- The one real performance defect found by measurement: the pure-JS SHA-256 was rewritten to avoid
+  allocating on the hot path (189 ms → 111 ms for 12 000 hashes of a 300-byte message).
 
 ## 4. Spec vs "vibe coding", on one function
 

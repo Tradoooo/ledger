@@ -50,17 +50,21 @@ and the published [`/proof.html`](https://tradoooo.github.io/ledger/proof.html).
 - A public view is irreversible: no private marker, no `party.id`, no source fingerprint.
 - Importing the same statement twice adds nothing (fingerprinted lines).
 - No `Date.now`, no `new Date`, no `Math.random`, no `fetch` in the core — checked by `scripts/lint.mjs`.
+- A third application (a time bank, unit `hour`) was built from this skeleton in **16 min 32 s**
+  by someone who had never opened the repository, without a single line changed under `packages/**`
+  — see [`docs/UNKNOWN-ROOM.md`](docs/UNKNOWN-ROOM.md).
 
 ## Budgets (the ceiling never goes up)
 
 | Package | Lines | Ceiling | Fill |
 |---|---|---|---|
-| `packages/core` | 1 351 | 1 500 | 90 % |
-| `packages/ui` | 691 | 1 500 | 46 % |
+| `packages/core` | 1 369 | 1 500 | 91 % |
+| `packages/ui` | 699 | 1 500 | 47 % |
 | `skeleton` | 61 | 200 | 31 % |
-| **skeleton total** | **2 103** | **3 200** | 66 % |
+| **skeleton total** | **2 129** | **3 200** | 67 % |
 | `apps/envelopes` (its own lines) | 401 | 600 | 67 % |
 | `apps/mutual-aid` (its own lines) | 560 | 600 | 93 % |
+| `apps/time-bank` (third app, unpublished) | 542 | 600 | 90 % |
 
 `node .github/checks/loc-budget.mjs` fails the build when a budget is exceeded, and the only
 accepted fix is **removing code**. The rules that keep the skeleton lean are in
@@ -70,7 +74,9 @@ accepted fix is **removing code**. The rules that keep the skeleton lean are in
 
 | | |
 |---|---|
-| Tests and properties | **95** in 8 files, every property seeded |
+| Tests and properties | **95** in 8 files, every property seeded; 20 extra seeds × 200 runs, all green |
+| Measured acceptance run | **12/12** checks (`npx vite-node scripts/recette.ts`), 2 documented deviations |
+| Third application | built in **16 min 32 s** without touching `packages/**` |
 | Proofs re-run by `pnpm proof` | **8/8** |
 | Bundle, gzipped | skeleton **104 kB** · envelopes **109 kB** · mutual-aid **105 kB** (ceiling 220) |
 | Published pages | **3** + index + `/proof.html`, verified at 390×844 with no console error and no foreign request |
